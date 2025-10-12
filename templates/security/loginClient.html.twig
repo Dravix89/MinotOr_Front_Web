@@ -1,0 +1,249 @@
+{# templates/security/loginClient.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion Client
+{% endblock %}
+
+{% block body %}
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:900&display=swap" rel="stylesheet">
+
+	<style>
+		html,
+		body {
+			background: url('/images/bg-login.jpg') no-repeat center center fixed;
+			background-size: cover;
+			margin: 0;
+			font-family: sans-serif;
+			height: 100%;
+		}
+
+		.login-container {
+			background: rgba(255, 255, 255, 0.85);
+			padding: 1.5rem;
+			border-radius: 12px;
+			max-width: 600px;
+			margin: auto;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			min-height: auto;
+		}
+
+		form {
+			max-width: 500px;
+		}
+
+		h1 {
+			/* Depuis Google Fonts : <link href="https://fonts.googleapis... */
+			font-family: 'Montserrat', sans-serif;
+			font-weight: 900;
+			text-align: center;
+			margin-bottom: 1.5rem;
+		}
+
+		@media(max-width: 768px) {
+			.login-container {
+				margin: 5vh 1rem;
+				padding: 1.5rem;
+			}
+		}
+
+		.my-gradient-btn {
+			background: linear-gradient(#f9f8f4, #f3edd9, #e8dfb8,rgba(191, 129, 37, 0.76));
+			font-weight: bold;
+			border: none;
+			padding: 0.75rem 1.5rem;
+			border-radius: 8px;
+			transition: all 0.3s ease;
+			text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+			color: #4a3c0a;
+		}
+
+		.my-gradient-btn:hover {
+			background: linear-gradient(#f7f6f0, #ebe5cc, #d8c88f,rgb(181, 124, 33));
+			transform: translateY(-2px);
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
+			cursor: pointer;
+			color: #3d3108;
+		}
+
+		.my-gradient-btn:active {
+			background: linear-gradient(#f4f3ed, #e3ddc0, #cbbf7b, #8d6215);
+			transform: translateY(0);
+			box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+			color: #2f2506;
+		}
+
+		.alert {
+			padding: 0.75rem 1rem;
+			margin-bottom: 1rem;
+			border-radius: 5px;
+			font-weight: bold;
+			text-align: center;
+		}
+
+		.alert-danger {
+			background-color: #f8d7da;
+			color: #842029;
+			border: 1px solid #f5c2c7;
+		}
+
+		.alert-success {
+			background-color: #d1e7dd;
+			color: #0f5132;
+			border: 1px solid #badbcc;
+		}
+	</style>
+
+	<header class="d-flex justify-content-between align-items-center p-3">
+		<nav>
+			<a href="/" class="me-3 text-decoration-none fw-bold text-dark">Accueil</a>
+			<a href="/produits" class="me-3 text-decoration-none fw-bold text-dark">Produits</a>
+			<a href="{{ path('app_login_client') }}" class="me-3 text-decoration-none fw-bold text-dark">Espace-Client</a>
+			{% if app.user %}
+				<a href="{{ path('app_logout') }}" class="text-decoration-none fw-bold text-danger">Déconnexion</a>
+			{% endif %}
+		</nav>
+	</header>
+
+	{% for message in app.flashes('success') %}
+		<div class="alert alert-success">
+			{{ message }}
+		</div>
+	{% endfor %}
+
+
+	<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+		<div class="login-container">
+			<h1>Connexion Client</h1>
+
+			{# Affichage des messages flash erreur #}
+			{% for message in app.flashes('error') %}
+				<div class="alert alert-danger">{{ message }}</div>
+			{% endfor %}
+
+			<div id="message-container" class="alert" style="display:none;"></div>
+
+
+			<form
+				method="post" data-turbo="false" class="p-4 bg-white rounded shadow-sm" style="max-width: 400px; margin: auto; min-height: 250px; padding: 1rem;">
+				{# Champ caché pour insérer le token CSRF afin de protéger le formulaire contre les attaques CSRF #}
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+				<div class="mb-3">
+					<input type="email" name="_username" class="form-control" placeholder="Email" required autofocus autocomplete="username">
+				</div>
+
+				<div class="mb-3">
+					<input type="password" name="_password" class="form-control" placeholder="Mot de passe" required autocomplete="current-password">
+				</div>
+
+				<div class="form-check mb-3 text-start">
+					<input class="form-check-input" type="checkbox" id="rgpd" name="rgpd" required>
+					<label class="form-check-label" for="rgpd" style="font-size: 0.9rem;">
+						J'accepte la
+						<a href="/politique-confidentialite" target="_blank" style="color: #bf8125;">politique de confidentialité</a>
+						et les
+						<a href="/conditions-utilisation" target="_blank" style="color: #bf8125;">conditions d'utilisation</a>.
+					</label>
+				</div>
+
+				<button type="submit" class="my-gradient-btn w-100">
+					Se Connecter
+				</button>
+
+				<div class="text-center mt-3">
+					<a href="{{ path('app_forgot_password_request') }}" class="text-decoration-none" style="color: #bf8125;">
+						Mot de passe oublié ?
+					</a>
+				</div>
+			</form>
+		</div>
+	</div>
+
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+const form = document.querySelector('form');
+const messageContainer = document.getElementById('message-container');
+
+form.addEventListener('submit', async function (e) {
+e.preventDefault();
+
+const email = this._username.value;
+const password = this._password.value;
+
+messageContainer.style.display = 'none';
+messageContainer.textContent = '';
+messageContainer.classList.remove('alert-danger', 'alert-success');
+
+try { // 1. Authentification -> récupère token
+const response = await fetch('http://localhost:8000/api/login_check', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(
+{username: email, password: password}
+)
+});
+
+if (! response.ok) {
+const errorText = await response.text();
+throw new Error(`Erreur ${
+response.status
+} : ${errorText}`);
+}
+
+const data = await response.json();
+localStorage.setItem('jwt_token', data.token);
+
+// 2. Récupérer les infos utilisateur avec le token via /api/me
+const userResponse = await fetch('http://localhost:8000/api/me', {
+headers: {
+'Authorization': 'Bearer ' + data.token
+}
+});
+
+if (! userResponse.ok) {
+const errorText = await userResponse.text();
+throw new Error(`Erreur récupération user ${
+userResponse.status
+} : ${errorText}`);
+}
+
+const user = await userResponse.json();
+
+// 3. Envoyer mon token + user à Symfony pour stockage en session
+await fetch('/client/store-session', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+credentials: 'same-origin', // Important pour cookies session, a voir nelmio_cors.yaml dans API
+body: JSON.stringify(
+{token: data.token, user: user}
+)
+});
+
+messageContainer.textContent = 'Connexion réussie !';
+messageContainer.classList.add('alert-success');
+messageContainer.style.display = 'block';
+
+// Mon token est stocké AVANT la redirection, client/acc appelée avec le token présent
+localStorage.setItem('jwt_token', data.token);
+window.location.href = '/client/accueil';
+
+
+} catch (err) {
+messageContainer.textContent = 'Erreur : ' + err.message;
+messageContainer.classList.add('alert-danger');
+messageContainer.style.display = 'block';
+}
+});
+});
+	</script>
+
+
+{% endblock %}

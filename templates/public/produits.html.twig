@@ -1,0 +1,106 @@
+{# templates/public/produits.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Nos Produits
+{% endblock %}
+
+{% block body %}
+	<style>
+		html,
+		body {
+			margin: 0;
+			min-height: 100vh;
+			font-family: sans-serif;
+			background: linear-gradient(rgb(248, 247, 246), #f4f1ea, #ede5d2, #bf8125);
+		}
+		main {
+			padding: 2rem;
+			max-width: 1200px;
+			margin: auto;
+			background-color: rgba(255, 255, 255, 0.85);
+			border-radius: 8px;
+			box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
+		}
+		.card img {
+			object-fit: contain;
+			object-position: center;
+			height: 150px;
+			width: 100%;
+			border-bottom: 1px solid #ddd;
+		}
+		.card-body {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+		.card-text {
+			flex-grow: 1;
+		}
+	</style>
+
+	<main style="margin-top: 5rem;">
+		<h1 class="text-center mb-4">Nos Produits</h1>
+
+		<p class="text-center mb-4" style="font-weight: 600; color:black;">
+			Pour faire une demande de devis, merci de :
+			<br>
+			<a href="{{ path('app_register') }}" style="color:rgb(179, 122, 38); text-decoration: none; font-weight: 800; cursor: pointer;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';" title="Créer un compte client">
+				Créer Un Compte Client Ici
+			</a>
+		</p>
+
+		{% set produitsFiltres = produits|filter(p => p.categorieProduit != 'Pain Invendu') %}
+
+		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+			{% for produit in produitsFiltres %}
+				<div class="col">
+					<div class="card h-100 shadow-sm">
+						<div class="card-body d-flex flex-column">
+							<img src="{{ asset('images/AlertIMG.png') }}" alt="{{ produit.nomProduit }}" class="img-fluid rounded-top" style="max-height: 150px; object-fit: contain; padding: 1rem; background: #f8f9fa;">
+							<h5 class="card-title">Nom Produit :
+								{{ produit.nomProduit }}</h5>
+							<p class="card-text">
+								Type Produit :
+								{{ produit.typeProduit.nomTypeProduit ?? 'Type inconnu' }}<br>
+								Categorie Produit :
+								{{ produit.categorieProduit }}<br>
+								Prix HT :
+								{{ produit.prixProduit }}
+								€
+							</p>
+							<small class="text-muted mt-auto">* Consultation uniquement, pas d'achat direct</small>
+						</div>
+					</div>
+				</div>
+			{% else %}
+				<p>Aucun produit disponible pour le moment.</p>
+			{% endfor %}
+
+			{% for produit in produitsFiltres %}
+				<div class="col">
+					<div class="card h-100 shadow-sm">
+						<div class="card-body d-flex flex-column">
+							<img src="{{ asset('images/AlertIMG.png') }}" alt="{{ produit.nomProduit }}" class="img-fluid rounded-top" style="max-height: 150px; object-fit: contain; padding: 1rem; background: #f8f9fa;">
+							<h5 class="card-title">Nom Produit :
+								{{ produit.nomProduit }}</h5>
+							<p class="card-text">
+								Type Produit :
+								{{ produit.typeProduit.nomTypeProduit ?? 'Type inconnu' }}<br>
+								Categorie Produit :
+								{{ produit.categorieProduit }}<br>
+								Prix HT :
+								{{ produit.prixProduit }}
+								€
+							</p>
+							<small class="text-muted mt-auto">* Consultation uniquement, pas d'achat direct</small>
+						</div>
+					</div>
+				</div>
+			{% else %}
+				<p>Aucun produit disponible pour le moment.</p>
+			{% endfor %}
+		</div>
+
+	</main>
+{% endblock %}

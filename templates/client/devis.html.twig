@@ -1,0 +1,178 @@
+{# templates/client/devis.html.twig #}
+
+{% block title %}Mes Devis
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+{% block page_title %}📑 Mes Devis
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+
+	<div class="container-fluid">
+		<main>
+			<div class="card mb-4">
+				<div class="card-header text-black" style=" font-weight: 700;">
+					Demander Un Nouveau Devis
+				</div>
+				<div class="card-body">
+					<form
+						method="post" id="formDevisDemande" action="{{ path('client_devis_demande') }}">
+						{# Protection CSRF pour la soumission du formulaire de demande de devis #}
+						<input type="hidden" name="_token" value="{{ csrf_token('demande_devis') }}">
+						<div class="mb-3">
+							<label for="objet" class="form-label">Objet</label>
+							<input type="text" class="form-control" id="objet" name="objet" required>
+						</div>
+						<div class="mb-3">
+							<label for="description" class="form-label">Description</label>
+							<textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+						</div>
+
+
+						<button type="submit" class="btn btn-success d-block mx-auto">
+							Envoyer Au Commercial
+						</button>
+
+					</form>
+
+				</div>
+			</div>
+
+			<div class="card mb-4">
+				<div class="card-header text-black" style=" font-weight: 700;">
+					Produits En Cours De Sélection
+				</div>
+				<div class="card-body">
+					{% if produitsEnCours is not empty %}
+						<div class="table-responsive">
+							<table class="table table-sm table-bordered">
+								<thead>
+									<tr>
+										<th>Nom</th>
+										<th>Prix</th>
+										<th>Quantité</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for produit in produitsEnCours %}
+										<tr>
+											<td>{{ produit.nomProduit }}</td>
+											<td class="prix-unitaire" data-prix="{{ produit.prixProduit }}">
+												{{ produit.prixProduit }}
+												€
+											</td>
+											<td>
+												<input type="number" form="formDevisDemande" name="produits[{{ produit.id }}][quantite]" value="{{ produit.quantiteProduit ?? 1 }}" min="1" style="width: 60px;">
+											</td>
+
+											<td>
+												<form method="post" action="{{ path('client_retirer_du_devis', { id: produit.id }) }}">
+													<input type="hidden" name="_token" value="{{ csrf_token('retirer_produit_' ~ produit.id) }}">
+													<button type="submit" class="btn btn-sm btn-outline-danger">❌</button>
+												</form>
+											</td>
+										</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+							{% set total_provisoire = 0 %}
+							{% for produit in produitsEnCours %}
+								{% set total_provisoire = total_provisoire + produit.prixProduit %}
+							{% endfor %}
+							<p>
+								<strong>Total Provisoire :</strong>
+								<span id="total-provisoire">{{ total_provisoire }}</span>
+								€
+							</p>
+						</div>
+					{% else %}
+						<p class="text-muted">Aucun produit ajouté au devis.</p>
+					{% endif %}
+				</div>
+			</div>
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover">
+					<thead class="table-light">
+						<tr>
+							<th>Numéro Devis</th>
+							<th>Date</th>
+							<th>Status</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+
+						{% for devis in devisList %}
+							<tr>
+								<td>{{ devis.numDevis }}
+								</td>
+								<td>{{ devis.date ? devis.date|date('d/m/Y') : 'Date inconnue' }}
+								</td>
+								<td>
+									{% if devis.choix_client == 'Accepter' %}
+										<span class="badge bg-success">
+											Accepté</span>
+									{% elseif devis.choix_client == 'Refuser' %}
+										<span class="badge bg-secondary">Refusé</span>
+									{% else %}
+										<span class="badge bg-warning text-dark">En attente</span>
+									{% endif %}
+								</td>
+								<td>
+									<a href="{{ path('client_devis_detail', { id: devis.id }) }}" class="btn btn-outline-primary btn-sm">Voir détail</a>
+								</td>
+							</tr>
+						{% else %}
+							<tr>
+								<td colspan="4" class="text-center text-muted">Aucun devis trouvé.</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</main>
+	</div>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+const quantites = document.querySelectorAll('input[name^="produits"][type="number"]');
+const totalEl = document.getElementById('total-provisoire');
+
+function updatePrices() {
+let total = 0;
+quantites.forEach(input => {
+const tr = input.closest('tr');
+const prixUnitaire = parseFloat(tr.querySelector('.prix-unitaire').dataset.prix);
+const quantite = parseInt(input.value) || 1;
+const prixTotalProduit = prixUnitaire * quantite;
+
+// Mettre à jour l'affichage du prix total par produit dans la colonne prix (optionnel)
+tr.querySelector('.prix-unitaire').textContent = prixTotalProduit.toFixed(2) + ' €';
+
+total += prixTotalProduit;
+});
+totalEl.textContent = total.toFixed(2);
+}
+
+quantites.forEach(input => {
+input.addEventListener('input', updatePrices);
+});
+
+// Lancer au chargement pour que tout soit à jour
+updatePrices();
+});
+	</script>
+
+
+{% endblock %}

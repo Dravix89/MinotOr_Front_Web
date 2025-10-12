@@ -1,0 +1,78 @@
+{# templates/client/suivi_livraison.html.twig #}
+
+{% block title %}Suivi De Livraison
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+{% block page_title %}🚚 Suivi De Livraison
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main>
+		<h3 class="mb-4 text-center">Vous Pouvez Consulter Ici Le Statut De Vos Livraisons Récentes :</h3>
+
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Numéro De Commande</th>
+					<th>Produit</th>
+					<th>Date De Commande</th>
+					<th>Date De Livraison Prévue</th>
+					<th>Statut</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for livraison in livraisons %}
+					<tr>
+						<td>L00{{ livraison.id }}</td>
+						<td>
+							{% if livraison.transaction.estContenus is not empty %}
+								{% for contenu in livraison.transaction.estContenus %}
+									{{ contenu.produit.nomProduit }}
+									{% if not loop.last %},
+									{% endif %}
+								{% endfor %}
+							{% else %}
+								<em>Aucun produit</em>
+							{% endif %}
+						</td>
+
+						<td>
+							{% set dateCommande = livraison.transaction.estContenus|first ? livraison.transaction.estContenus|first.date : null %}
+							{{ dateCommande ? dateCommande|date('d/m/Y') : 'N/D' }}
+						</td>
+
+						<td>{{ livraison.dateLivraison|date('d/m/Y') }}</td>
+
+						<td>
+							{% if livraison.statutLivraison == 'Terminé' or livraison.etatLivraison == 'Livré' %}
+								<span class="badge bg-success">Terminé</span>
+							{% elseif livraison.statutLivraison == 'En cours' %}
+								<span class="badge bg-warning text-dark">En cours</span>
+							{% else %}
+								<span class="badge bg-secondary">À traiter</span>
+							{% endif %}
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="5" class="text-center text-muted">Aucune livraison récente.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+
+		</table>
+	</main>
+
+
+{% endblock %}

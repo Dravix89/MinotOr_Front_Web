@@ -1,0 +1,57 @@
+<style>
+	.menu-item {
+		font-weight: normal;
+		color: #000;
+		text-decoration: none;
+		display: flex;
+		align-items: center;
+	}
+
+	.menu-item:hover,
+	.menu-item.active {
+		font-weight: 700;
+	}
+</style>
+
+{% set current_route = app.request.attributes.get('_route') %}
+
+
+<!-- Version desktop -->
+<div class="container-fluid h-100">
+	<div class="row h-100 flex-nowrap">
+		<div class="d-flex flex-column gap-3">
+			{% include 'approvisionneur/asideApprovisionneur/menu_content.html.twig' %}
+		</div>
+	</div>
+</div>
+
+<!-- Version mobile : Offcanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="mobileSidebarLabel">Menu</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body d-flex flex-column gap-3">
+		<a href="{{ path('dashboard_approvisionneur') }}" class="menu-item{% if current_route == 'dashboard_index' %} active{% endif %}">
+			<i class="fas fa-chart-line me-2"></i>
+			Tableau De Bord
+		</a>
+		<a href="{{ path('commande') }}" class="menu-item{% if current_route == 'commande' %} active{% endif %}">
+			<i class="fas fa-handshake me-2"></i>
+			Demande Commercial
+		</a>
+		<a href="{{ path('entrepot') }}" class="menu-item{% if current_route == 'entrepot' %} active{% endif %}">
+			<i class="fas fa-warehouse me-2"></i>
+			Gestion Des Entrepôts
+		</a>
+		<a href="{{ path('collecte_fournisseur') }}" class="menu-item{% if current_route == 'collecte_fournisseur' %} active{% endif %}">
+			<i class="fas fa-truck me-2"></i>
+			Gestion Fournisseur
+		</a>
+		<a href="{{ path('collecte_client') }}" class="menu-item{% if current_route == 'collecte_client' %} active{% endif %}">
+			<i class="fas fa-user me-2"></i>
+			Gestion Client
+		</a>
+
+	</div>
+</div>

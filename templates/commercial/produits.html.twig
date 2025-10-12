@@ -1,0 +1,200 @@
+{# templates/commercial/fournisseurs.html.twig #}
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Gestion Des Produits
+{% endblock %}
+{% block page_title %}🏷️ Gestion Des Types De Produits
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'commercial/asideCommercial/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'commercial/asideCommercial/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main class="flex-fill overflow-auto p-4 mb-4" role="main">
+
+		<div class="mb-3 text-end">
+			<button class="btn btn-primary" id="btnAddProduct">➕ Ajouter un produit</button>
+		</div>
+
+		<div id="formProduct" class="card p-4 mb-4" style="display:none; max-width: 700px; margin: auto;">
+			<h2 class="h5 text-center mb-3">Ajouter / Modifier un produit</h2>
+
+			<form
+				method="POST" action="{{ path('product_save') }}">
+				{# Token CSRF pour sécuriser la soumission du formulaire contre les attaques CSRF #}
+				<input type="hidden" name="_token" value="{{ csrf_token('product_save') }}">
+				<input type="hidden" id="product_id" name="id" value="">
+
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label for="reference" class="form-label">Référence *</label>
+						<input type="text" id="reference" name="reference" class="form-control" required>
+					</div>
+					<div class="col-md-6">
+						<label for="nom" class="form-label">Nom du produit *</label>
+						<input type="text" id="nom" name="nom" class="form-control" required>
+					</div>
+					<div class="col-12">
+						<label for="description" class="form-label">Description</label>
+						<textarea id="description" name="description" class="form-control"></textarea>
+					</div>
+					<div class="col-md-6">
+						<label for="prix_achat" class="form-label">Prix d'achat HT (€) *</label>
+						<input type="number" id="prix_achat" name="prixAchat" class="form-control" step="0.01" required>
+					</div>
+					<div class="col-md-6">
+						<label for="marge" class="form-label">Marge (%)</label>
+						<input type="number" id="marge" name="marge" class="form-control" value="20" step="0.1">
+					</div>
+					<div class="col-md-6">
+						<label for="prix_vente" class="form-label">Prix de vente HT (€)</label>
+						<input type="number" id="prix_vente" name="prixVente" class="form-control" readonly>
+					</div>
+					<div class="col-md-6">
+						<label for="stock" class="form-label">Quantité en stock *</label>
+						<input type="number" id="stock" name="stock" class="form-control" min="0" required>
+					</div>
+				</div>
+
+				<div class="mt-4 text-end">
+					<button type="submit" class="btn btn-success">💾 Enregistrer</button>
+					<button type="button" class="btn btn-secondary ms-2" onclick="document.getElementById('formProduct').style.display='none'">Annuler</button>
+				</div>
+			</form>
+
+		</div>
+
+		<div class="table-responsive">
+			<table class="table table-bordered table-striped table-hover bg-white">
+				<thead class="table-dark">
+					<tr>
+						<th>ID</th>
+						<th>Nom</th>
+						<th>Description</th>
+						<th>Prix achat HT</th>
+						<th>Marge (%)</th>
+						<th>Prix vente HT</th>
+						<th>Stock</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for produit in produits %}
+						<tr>
+							<td>{{ produit.reference }}</td>
+							<td>{{ produit.nom }}</td>
+							<td>{{ produit.description }}</td>
+							<td>{{ produit.prixAchat|number_format(2, ',', ' ') }}
+								€</td>
+							<td>{{ produit.marge }}
+								%</td>
+							<td>{{ produit.prixVente|number_format(2, ',', ' ') }}
+								€</td>
+							<td>
+								{% if produit.stock_status == 'disponible' %}
+									<span class="badge bg-success">En stock ({{ produit.stock }})</span>
+								{% else %}
+									<span class="badge bg-warning text-dark">À venir</span>
+								{% endif %}
+							</td>
+
+							<td>
+								<a href="#" class="btn btn-sm btn-warning mb-1">✏️Modifier</a>
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="8" class="text-center">Aucun produit enregistré.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+
+		</div>
+	</main>
+
+
+	<script>
+		function initProductPage() {
+const formProduct = document.getElementById('formProduct');
+const productId = document.getElementById('product_id');
+const reference = document.getElementById('reference');
+const nom = document.getElementById('nom');
+const description = document.getElementById('description');
+const prixAchat = document.getElementById('prix_achat');
+const marge = document.getElementById('marge');
+const prixVente = document.getElementById('prix_vente');
+const stock = document.getElementById('stock');
+const btnAddProduct = document.getElementById('btnAddProduct');
+
+// Calcul et mise à jour du prix de vente
+function updatePrixVente() {
+const achat = parseFloat(prixAchat.value) || 0;
+const margeVal = parseFloat(marge.value) || 0;
+const vente = achat + (achat * margeVal / 100);
+prixVente.value = vente.toFixed(2);
+}
+
+// Ajout des listeners
+prixAchat.addEventListener('input', updatePrixVente);
+marge.addEventListener('input', updatePrixVente);
+
+btnAddProduct.addEventListener('click', e => {
+e.preventDefault();
+if (formProduct.style.display === 'block') {
+formProduct.style.display = 'none';
+} else {
+productId.value = '';
+reference.value = '';
+nom.value = '';
+description.value = '';
+prixAchat.value = '';
+marge.value = '20';
+prixVente.value = '';
+stock.value = 'disponible';
+formProduct.style.display = 'block';
+window.scrollTo(0, formProduct.offsetTop);
+}
+});
+
+// Gestion modification
+document.querySelectorAll('.btn-warning').forEach(button => {
+button.addEventListener('click', e => {
+e.preventDefault();
+const row = button.closest('tr');
+const cells = row.querySelectorAll('td');
+productId.value = row.getAttribute('data-id');
+reference.value = cells[0].innerText.trim();
+nom.value = cells[1].innerText.trim();
+description.value = cells[2].innerText.trim();
+prixAchat.value = parseFloat(cells[3].innerText.replace('€', '').replace(/\s/g, '').replace(',', '.')) || 0;
+marge.value = parseFloat(cells[4].innerText.replace('%', '').trim()) || 0;
+updatePrixVente();
+stock.value = cells[6].innerText.includes('À venir') ? 'attente' : 'disponible';
+formProduct.style.display = 'block';
+window.scrollTo(0, formProduct.offsetTop);
+});
+});
+
+// Gestion suppression
+document.querySelectorAll('.btn-danger').forEach(button => {
+button.addEventListener('click', e => {
+e.preventDefault();
+if (confirm('Supprimer ce produit ?')) {
+const row = button.closest('tr');
+// Ici à compléter côté serveur si besoin
+row.remove();
+}
+});
+});
+}
+
+// Appel initial (ou à rappeler manuellement après navigation)
+initProductPage();
+	</script>
+{% endblock %}

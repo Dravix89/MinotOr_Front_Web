@@ -1,0 +1,84 @@
+{# templates/client/commande_detail.html.twig #}
+
+{% block title %}Détail Commande
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+
+{% block page_title %}🧾 Détail Commande
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main class="flex-grow-1 p-4">
+
+
+		<div class="mb-4">
+			<strong>Numéro Commande :</strong>
+			C00{{ commande.id }}<br>
+			<strong>Date De Création :</strong>
+			{{ commande.dateCreation|date('d/m/Y') }}<br>
+			<strong>Status Livraison :</strong>
+			{% if commande.statutLivraison is defined and commande.statutLivraison == 'livree' %}
+				<span class="badge bg-success">Livrée</span>
+			{% else %}
+				<span class="badge bg-warning text-dark">En attente</span>
+			{% endif %}<br>
+			<strong>Status Paiement :</strong>
+			{% if commande.statutPaiement is defined and commande.statutPaiement == 'Payé' %}
+				<span class="badge bg-success">Payé</span>
+			{% else %}
+				<span class="badge bg-danger">Non Payé</span>
+			{% endif %}
+		</div>
+
+		<h4 class="mt-4">Produits :</h4>
+		<div class="table-responsive">
+			<table class="table table-sm table-striped mt-2">
+				<thead>
+					<tr>
+						<th>Produit</th>
+						<th>Quantité</th>
+						<th>Prix Unitaire</th>
+						<th>Total</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for item in commande.estContenus %}
+						<tr>
+							<td>{{ item.produit.nomProduit }}</td>
+							<td>{{ item.quantiteProduit }}</td>
+							<td>{{ item.produit.prixProduit|number_format(2, ',', ' ') }}
+								€</td>
+							<td>{{ (item.quantiteProduit * item.produit.prixProduit)|number_format(2, ',', ' ') }}
+								€</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="4" class="text-center text-muted">Aucun produit trouvé.</td>
+						</tr>
+					{% endfor %}
+
+
+				</tbody>
+			</table>
+		</div>
+
+		<div class="mt-4">
+			<strong>Total Commande :</strong>
+			{{ commande.montantTotal|number_format(2, '.', ' ') }}
+			€
+		</div>
+	</main>
+
+
+{% endblock %}

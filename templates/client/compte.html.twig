@@ -1,0 +1,149 @@
+{# templates/client/compte.html.twig #}
+
+
+{% block title %}Mon Compte
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+
+{% block page_title %}
+	<h1 class="mb-4 mt-3 text-center">🤝 Bienvenue :
+		<span id="client-nom-prenom"></span>
+	</h1>
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main>
+		<div class="card mb-4">
+			<div class="card-header d-flex justify-content-between align-items-center">
+				<span>Informations personnelles</span>
+				<button type="button" class="btn btn-danger btn-sm" onclick="signOut()">Déconnexion</button>
+			</div>
+			{# Pour voir mon Tracking  #}
+			{# <pre>{{ dump(app.request.get('_route')) }}</pre> #}
+			<div class="card-body">
+				<p>
+					<strong>Nom :</strong>
+					<span id="client-nom-info"></span>
+				</p>
+				<p>
+					<strong>Prénom :</strong>
+					<span id="client-prenom"></span>
+				</p>
+				<p>
+					<strong>Email :</strong>
+					<span id="client-email"></span>
+				</p>
+			</div>
+		</div>
+
+
+		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+			<div class="col">
+				<a href="{{ path('client_commandes') }}" class="card text-center shadow-sm h-100 text-decoration-none text-dark border-0" style="background-color: #f8f5f0;">
+					<div class="card-body">
+						<div class="mb-2 fs-3">📦</div>
+						<h5 class="card-title">Mes Commandes</h5>
+					</div>
+				</a>
+			</div>
+			<div class="col">
+				<a href="{{ path('client_devis') }}" class="card text-center shadow-sm h-100 text-decoration-none text-dark border-0" style="background-color: #f8f5f0;">
+					<div class="card-body">
+						<div class="mb-2 fs-3">📝</div>
+						<h5 class="card-title">Mes Devis</h5>
+					</div>
+				</a>
+			</div>
+			<div class="col">
+				<a href="{{ path('client_envies') }}" class="card text-center shadow-sm h-100 text-decoration-none text-dark border-0" style="background-color: #f8f5f0;">
+					<div class="card-body">
+						<div class="mb-2 fs-3">❤️</div>
+						<h5 class="card-title">Envies</h5>
+					</div>
+				</a>
+			</div>
+			<div class="col">
+				<a href="{{ path('client_factures') }}" class="card text-center shadow-sm h-100 text-decoration-none text-dark border-0" style="background-color: #f8f5f0;">
+					<div class="card-body">
+						<div class="mb-2 fs-3">💰</div>
+						<h5 class="card-title">Mes Factures</h5>
+					</div>
+				</a>
+			</div>
+			<div class="col">
+				<a href="{{ path('client_commande_cyclique') }}" class="card text-center shadow-sm h-100 text-decoration-none text-dark border-0" style="background-color: #f8f5f0;">
+					<div class="card-body">
+						<div class="mb-2 fs-3">🔁</div>
+						<h5 class="card-title">Commande Cyclique</h5>
+					</div>
+				</a>
+			</div>
+			<div class="col">
+				<a href="{{ path('client_pain_invendu') }}" class="card text-center shadow-sm h-100 text-decoration-none text-dark border-0" style="background-color: #f8f5f0;">
+					<div class="card-body">
+						<div class="mb-2 fs-3">🍞</div>
+						<h5 class="card-title">Pain Invendu</h5>
+					</div>
+				</a>
+			</div>
+		</div>
+
+	</main>
+
+
+	<script>
+		function signOut() {
+localStorage.removeItem('jwt_token'); // supprime le token
+window.location.href = '/login-client'; // redirige vers login
+}
+	</script>
+
+
+	<script>
+		document.addEventListener('DOMContentLoaded', async () => {
+const token = localStorage.getItem('jwt_token');
+if (! token) {
+alert('Non authentifié');
+window.location.href = '/login-client';
+return;
+}
+
+try {
+const response = await fetch('http://localhost:8000/api/me', {
+headers: {
+Authorization: 'Bearer ' + token
+}
+});
+
+if (! response.ok)
+throw new Error('Erreur API');
+
+
+
+const data = await response.json();
+
+// Injecter les données dans le HTML
+document.querySelector('#client-nom-prenom').textContent = data.prenom + ' ' + data.nom; // pour le <h1>
+document.querySelector('#client-nom-info').textContent = data.nom; // pour la section info
+document.querySelector('#client-prenom').textContent = data.prenom;
+document.querySelector('#client-email').textContent = data.email;
+
+} catch (err) {
+console.error(err);
+alert('Erreur lors du chargement des données utilisateur');
+}
+});
+	</script>
+
+{% endblock %}

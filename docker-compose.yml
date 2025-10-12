@@ -1,0 +1,17 @@
+services:
+    front:
+        build:
+            context: ./
+        container_name: front
+        ports:
+            - "8001:8001"
+        volumes:
+            - ./:/var/www/html
+        environment:
+            - NODE_ENV=development
+        networks:
+            - minotor-net
+
+networks:
+    minotor-net:
+        external: true

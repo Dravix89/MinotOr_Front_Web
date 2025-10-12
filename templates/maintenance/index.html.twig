@@ -1,0 +1,61 @@
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Dashboard Maintenance
+{% endblock %}
+{% block page_title %}📊 Dashboard Maintenance
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'maintenance/asideMaintenance/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'maintenance/asideMaintenance/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main>
+		<div class="d-flex justify-content-end mb-3">
+			<a href="#" onclick="logout()" class="text-decoration-none fw-bold text-danger">Déconnexion</a>
+		</div>
+		<div class="row g-4">
+			<div class="col-md-4">
+				<div class="p-3 border rounded bg-light h-100 text-center">
+					<h5>🧽 Camions à nettoyer</h5>
+					<p class="text-muted">Liste des camions à traiter</p>
+					<a href="{{ path('maintenance_camions') }}" class="btn btn-outline-primary btn-sm">
+						Accéder
+						{% if count_a_nettoyer > 0 %}
+							<span class="badge bg-danger ms-2">{{ count_a_nettoyer }}</span>
+						{% endif %}
+					</a>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="p-3 border rounded bg-light h-100 text-center">
+					<h5>🕒 En cours de nettoyage</h5>
+					<p class="text-muted">Voir les camions actuellement indisponibles</p>
+					<a href="{{ path('maintenance_en_cours') }}" class="btn btn-outline-primary btn-sm">
+						Voir
+						{% if count_en_maintenance > 0 %}
+							<span class="badge bg-warning text-dark ms-2">{{ count_en_maintenance }}</span>
+						{% endif %}
+					</a>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="p-3 border rounded bg-light h-100 text-center">
+					<h5>📜 Historique</h5>
+					<p class="text-muted">Consulter les précédentes interventions</p>
+					<a href="{{ path('maintenance_historique') }}" class="btn btn-outline-primary btn-sm">Consulter</a>
+				</div>
+			</div>
+		</div>
+	</main>
+	<script>
+		function logout() {
+localStorage.removeItem('jwt_token'); // Supprime le token
+window.location.href = '/login-backoffice'; // Redirige vers la page login
+}
+	</script>
+{% endblock %}

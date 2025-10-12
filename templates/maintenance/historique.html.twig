@@ -1,0 +1,45 @@
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Historique Des Nettoyages
+{% endblock %}
+{% block page_title %}📜 Historique Des Nettoyages
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'maintenance/asideMaintenance/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'maintenance/asideMaintenance/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main>
+		<h2 class="text-center mb-4">Historique des nettoyages de camions</h2>
+
+		<div class="table-responsive">
+			<table class="table table-bordered table-hover shadow-sm bg-white">
+				<thead class="table-light">
+					<tr>
+						<th>#ID</th>
+						<th>Nom du camion</th>
+						<th>Date de nettoyage</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for camion in historique %}
+						<tr>
+							<td>{{ camion.id }}</td>
+							<td>{{ camion.nom }}</td>
+							<td>{{ camion.dernierNettoyage|date('d/m/Y') }}</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="3" class="text-center text-muted">Aucun nettoyage enregistré</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</main>
+{% endblock %}

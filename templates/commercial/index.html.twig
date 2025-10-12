@@ -1,0 +1,60 @@
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Dashboard Commercial
+{% endblock %}
+
+{% block page_title %}📊 Dashboard Commercial
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'commercial/asideCommercial/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'commercial/asideCommercial/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main>
+		<div class="d-flex justify-content-end mb-3">
+			<a href="#" onclick="logout()" class="text-decoration-none fw-bold text-danger">Déconnexion</a>
+		</div>
+
+		<div class="row g-4">
+			<div class="col-md-4">
+				<div class="p-3 border rounded bg-light h-100 text-center">
+					<h5>📋 Gestion Des Devis</h5>
+					<p class="text-muted">Voir, répondre et accorder des ristournes</p>
+					<a href="{{ path('commercial_devis') }}" class="btn btn-outline-primary btn-sm">Accéder</a>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="p-3 border rounded bg-light h-100 text-center">
+					<h5>📦 Gestion Des Fournisseurs</h5>
+					<p class="text-muted">Ajouter/modifier des minotiers</p>
+					<a href="{{ path('commercial_fournisseurs') }}" class="btn btn-outline-primary btn-sm">Accéder</a>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="p-3 border rounded bg-light h-100 text-center">
+					<h5>🏷️ Gestion Produits</h5>
+					<p class="text-muted">Gérer les types de produits disponibles</p>
+					<a href="{{ path('commercial_produits') }}" class="btn btn-outline-primary btn-sm">Accéder</a>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="p-3 border rounded bg-light h-100 text-center">
+					<h5>🚚 Paramètres Livraison</h5>
+					<p class="text-muted">Modifier le coût km et frais fixes</p>
+					<a href="{{ path('commercial_livraison') }}" class="btn btn-outline-primary btn-sm">Accéder</a>
+				</div>
+			</div>
+		</div>
+	</main>
+	<script>
+		function logout() {
+localStorage.removeItem('jwt_token'); // Supprime le token
+window.location.href = '/login-backoffice'; // Redirige vers la page login
+}
+	</script>
+{% endblock %}

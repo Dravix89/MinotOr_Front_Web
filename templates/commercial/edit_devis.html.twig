@@ -1,0 +1,45 @@
+{# templates/commercial/edit_devis.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Devis
+	{{ devisId }}
+{% endblock %}
+
+{% block body %}
+	<div class="container my-5">
+		<h1 class="mb-4 text-center">✏️ Modifier Le Devis
+			{{ devisId }}</h1>
+
+		<form
+			method="post" action="{{ path('commercial_devis_edit', {'reference': devisId}) }}">
+			{# Token CSRF pour protéger le formulaire contre les attaques de type Cross-Site Request Forgery #}
+			<input type="hidden" name="_token" value="{{ csrf_token('edit_devis_' ~ devisId) }}">
+			<div class="row g-3 justify-content-center">
+				<div class="col-12 col-md-6">
+					<label for="client" class="form-label">Client</label>
+					<input type="text" id="client" name="client" class="form-control" value="{{ devis.client_name ?? '' }}" required>
+				</div>
+
+				<div class="col-12 col-md-6">
+					<label for="status" class="form-label">Statut</label>
+					<select id="status" name="status" class="form-select" required>
+						<option value="En attente" {% if devis.status == 'En attente' %} selected {% endif %}>En attente</option>
+						<option value="Accepté" {% if devis.status == 'Accepté' %} selected {% endif %}>Accepté</option>
+						<option value="Refusé" {% if devis.status == 'Refusé' %} selected {% endif %}>Refusé</option>
+					</select>
+				</div>
+
+				<div class="col-12 col-md-6">
+					<label for="dateLivraison" class="form-label">Date de livraison</label>
+					<input type="date" id="dateLivraison" name="dateLivraison" class="form-control" value="{{ devis.delivery_date ? devis.delivery_date|date('Y-m-d') : '' }}" required>
+				</div>
+
+				<div class="col-12 col-md-6 d-flex align-items-end gap-2">
+					<button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+					<a href="{{ path('commercial_devis') }}" class="btn btn-secondary">Annuler</a>
+				</div>
+			</div>
+		</form>
+	</div>
+{% endblock %}

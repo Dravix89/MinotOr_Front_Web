@@ -1,0 +1,158 @@
+{# templates/client/produit.html.twig #}
+
+{% block title %}Détail Du Produit
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+{% block page_title %}Détail Du Produit
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+
+
+	<style>
+		.btn-gradient {
+			background: linear-gradient(#f9f8f4, #f3edd9, #e8dfb8, rgba(191, 129, 37, 0.76));
+			border: none;
+			color: #000;
+			transition: background 0.3s ease;
+		}
+		.btn-gradient:hover {
+			background: linear-gradient(rgba(191, 129, 37, 0.9), #e8dfb8, #f3edd9, #f9f8f4);
+			color: #000;
+		}
+
+		.btn-success {
+			background: linear-gradient(#f9f8f4, #f3edd9, #e8dfb8, rgba(191, 129, 37, 0.76));
+			border: none;
+			color: #000;
+			transition: background 0.3s ease;
+		}
+		.btn-success:hover {
+			background: linear-gradient(rgba(191, 129, 37, 0.9), #e8dfb8, #f3edd9, #f9f8f4);
+			color: #000;
+		}
+
+		.img-small-md {
+			max-width: 100%;
+			height: auto;
+		}
+		@media(min-width: 768px) {
+			.img-small-md {
+				max-width: 33%;
+			}
+		}
+	</style>
+
+	<main class="flex-grow-1 p-4">
+		<div class="container py-4git">
+			<div class="card mb-4">
+				<div class="row g-3 align-items-center flex-wrap">
+					<div
+						class="col-12 col-md-5">
+						{# <img src="{{ produit.imageProduit is defined and produit.imageProduit ? (produit.imageProduit starts with 'http' ? produit.imageProduit : asset(produit.imageProduit)) : asset('images/AlertIMG.png') }}" class="img-fluid rounded-start img-small-md" alt="{{ produit.nomProduit }}"> #}
+						<img src="{{ asset('images/AlertIMG.png') }}" class="img-fluid rounded-start img-small-md" alt="Image par défaut">
+
+
+					</div>
+					<div class="col-12 col-md-7">
+						<div class="card-body">
+							<h3 class="card-title">{{ produit.nomProduit }}</h3>
+							<p class="card-text">{{ produit.categorieProduit }}</p>
+
+							<p class="card-text">
+								<strong>Prix au Kg :</strong>
+								{{ produit.prixProduit }} €/kg (HT)
+							</p>
+							<form
+								method="post" action="{{ path('client_ajouter_au_devis', { id: produit.id }) }}">
+								<div class="mb-3">
+									<label for="typeConditionnement" class="form-label">Type de conditionnement :</label>
+									<select id="typeConditionnement" name="typeConditionnement" class="form-select" onchange="updateConditionnement()">
+										<option value="sac" selected>Sac (25kg)</option>
+										<option value="vrac">Vrac</option>
+									</select>
+								</div>
+								<div id="sacOptions" class="mb-3">
+									<label for="quantiteSac" class="form-label">Quantité de sacs :</label>
+									<select id="quantiteSac" name="quantiteSac" class="form-select" onchange="updatePrix()">
+										{% for i in 1..20 %}
+											<option value="{{ i }}">{{ i }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div id="vracOptions" class="mb-3" style="display:none;">
+									<div class="alert alert-warning p-2">Attention, pour avoir du vrac il faut un dispositif de vrac.</div>
+									<label for="poidsVrac" class="form-label">Poids (kg) :</label>
+									<select id="poidsVrac" name="poidsVrac" class="form-select" onchange="updatePrix()">
+										{% for poids in [25,50,75,100,125,150,175,200,225,250] %}
+											<option value="{{ poids }}">{{ poids }} kg</option>
+										{% endfor %}
+										<option value="autre">Autre...</option>
+									</select>
+									<input type="number" id="poidsVracAutre" name="poidsVracAutre" class="form-control mt-2" placeholder="Poids personnalisé (kg)" style="display:none;" min="1" max="1000" onchange="updatePrix()">
+								</div>
+								<p class="card-text">
+									<strong>Prix :</strong>
+									<span id="prixAffiche">{{ (produit.prixProduit * 25)|number_format(2, '.', ' ') }} € (Sac De 25 kg)</span>
+								</p>
+								<input type="hidden" name="prixCalcul" id="prixCalcul" value="{{ (produit.prixProduit * 25)|number_format(2, '.', ' ') }}">
+								{# Générer et inclure le token CSRF unique pour ce produit et cette action #}
+								<input
+								type="hidden" name="_token" value="{{ csrf_token('ajouter_au_devis' ~ produit.id) }}">
+								{# Bouton de soumission pour ajouter le produit au devis #}
+								<button type="submit" class="btn btn-success">Ajouter Au Devis</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<a href="{{ path('client_accueil') }}" class="btn btn-gradient">← Retour à la liste</a>
+		</div>
+	</main>
+
+<script>
+    const prixParKiloHT = {{ produit.prixProduit }};
+    function updateConditionnement() {
+        const type = document.getElementById('typeConditionnement').value;
+        document.getElementById('sacOptions').style.display = type === 'sac' ? '' : 'none';
+        document.getElementById('vracOptions').style.display = type === 'vrac' ? '' : 'none';
+        updatePrix();
+    }
+    document.getElementById('typeConditionnement').addEventListener('change', updateConditionnement);
+    document.getElementById('poidsVrac').addEventListener('change', function() {
+        const val = this.value;
+        document.getElementById('poidsVracAutre').style.display = val === 'autre' ? '' : 'none';
+        updatePrix();
+    });
+    function updatePrix() {
+        const type = document.getElementById('typeConditionnement').value;
+        let prix = 0;
+        if (type === 'sac') {
+            const quantite = parseInt(document.getElementById('quantiteSac').value) || 1;
+            prix = 25 * quantite * prixParKiloHT;
+            document.getElementById('prixAffiche').innerText = prix.toFixed(2) + ' € (' + quantite + ' sac(s) de 25kg)';
+        } else {
+            let poids = document.getElementById('poidsVrac').value;
+            if (poids === 'autre') {
+                poids = parseFloat(document.getElementById('poidsVracAutre').value) || 0;
+            }
+            prix = poids * prixParKiloHT;
+            document.getElementById('prixAffiche').innerText = prix.toFixed(2) + ' € (' + poids + ' kg vrac)';
+        }
+        document.getElementById('prixCalcul').value = prix.toFixed(2);
+    }
+    updateConditionnement();
+</script>
+{% endblock %}

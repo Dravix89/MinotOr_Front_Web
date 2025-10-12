@@ -1,0 +1,61 @@
+{# templates/client/pain_invendu.html.twig #}
+
+{% block title %}Déclarer Pains Invendus
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+{% block page_title %}🥖 Déclaration De Pain Invendu
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+
+
+	<main class="flex-grow-1 p-4">
+
+		<form
+			method="post" action="{{ path('client_pain_invendu_submit') }}">
+			{# Token CSRF pour protéger le formulaire contre les attaques CSRF #}
+			<input type="hidden" name="_token" value="{{ csrf_token('pain_invendu_submit') }}">
+			<div class="mb-3">
+				<label for="date" class="form-label">Date</label>
+				<input type="date" id="date" name="date" class="form-control" required>
+			</div>
+
+			<div class="mb-3">
+				<label for="produit" class="form-label">Produit</label>
+				<select id="produit" name="produit" class="form-select" required>
+					{% for produit in produits %}
+						<option value="{{ produit.id }}">{{ produit.nom }}</option>
+					{% endfor %}
+				</select>
+			</div>
+
+			<div class="mb-3">
+				<label for="quantite" class="form-label">Quantité</label>
+				<div class="input-group">
+					<input type="number" id="quantite" name="quantite" class="form-control" min="1" required>
+					<span class="input-group-text">Kg</span>
+				</div>
+			</div>
+
+
+			<div class="mb-3">
+				<label for="commentaire" class="form-label">Commentaire (optionnel)</label>
+				<textarea id="commentaire" name="commentaire" class="form-control" rows="3"></textarea>
+			</div>
+
+			<button type="submit" class="btn btn-primary">Déclarer</button>
+		</form>
+	</main>
+
+{% endblock %}

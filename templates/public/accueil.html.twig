@@ -1,0 +1,97 @@
+{# templates/public/accueil.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil
+{% endblock %}
+
+
+{% block body %}
+	<style>
+
+		html,
+		body {
+			background: url('/images/bg-login.jpg') no-repeat center center;
+			background-attachment: scroll;
+			background-size: cover;
+			margin: 0;
+			font-family: sans-serif;
+			height: 100%;
+		}
+
+		.btn-gradient {
+			background: linear-gradient(#f9f8f4, #f3edd9, #e8dfb8,rgba(191, 129, 37, 0.76));
+			font-weight: bold;
+			border: none;
+			padding: 0.75rem 1.5rem;
+			border-radius: 8px;
+			transition: all 0.3s ease;
+			text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+			color: #4a3c0a;
+		}
+
+		.btn-gradient:hover {
+			background: linear-gradient(#f7f6f0, #ebe5cc, #d8c88f,rgb(181, 124, 33));
+			transform: translateY(-2px);
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
+			cursor: pointer;
+			color: #3d3108;
+		}
+
+		.btn-gradient:active {
+			background: linear-gradient(#f4f3ed, #e3ddc0, #cbbf7b, #8d6215);
+			transform: translateY(0);
+			box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+			color: #2f2506;
+		}
+
+		h1 {
+			color: rgb(48, 28, 2);
+		}
+	</style>
+
+	<main class="container py-5 px-3">
+		<h1 class="text-center mb-5 mt-3">Bienvenue Sur Minot’Or</h1>
+		<h2 class="text-center fs-5 mt-0 mb-1" style="color: rgb(48, 28, 2); font-weight: 700;">
+			Découvrez nos produits, nos services et toutes nos offres.
+		</h2>
+
+		<div class="row mt-4">
+			<div class="col-12 col-md-4 mb-4">
+				<div class="card shadow-sm h-100">
+					<div class="card-body text-center d-flex flex-column justify-content-between">
+						<div>
+							<h5 class="card-title">Produits</h5>
+							<p class="card-text">Parcourez notre gamme complète de produits.</p>
+						</div>
+						<a href="{{ path('public_produits') }}" class="btn btn-gradient mt-3">Voir</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-4 mb-4">
+				<div class="card shadow-sm h-100">
+					<div class="card-body text-center d-flex flex-column justify-content-between">
+						<div>
+							<h5 class="card-title">À Propos</h5>
+							<p class="card-text">En savoir plus sur notre entreprise et nos engagements.</p>
+						</div>
+						<a href="{{ path('public_apropos') }}" class="btn btn-gradient mt-3">Découvrir</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-4 mb-4">
+				<div class="card shadow-sm h-100">
+					<div class="card-body text-center d-flex flex-column justify-content-between">
+						<div>
+							<h5 class="card-title">Contact</h5>
+							<p class="card-text">Une question ? Besoin d’aide ? Contactez-nous !</p>
+						</div>
+						<a href="{{ path('public_contact') }}" class="btn btn-gradient mt-3">Contacter</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+{% endblock %}

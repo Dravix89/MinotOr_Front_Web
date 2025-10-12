@@ -1,0 +1,51 @@
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Camions en Maintenance
+{% endblock %}
+{% block page_title %}⏱️ Camions en Maintenance
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'maintenance/asideMaintenance/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'maintenance/asideMaintenance/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main>
+		<h2 class="text-center mb-4">Camions en cours de nettoyage</h2>
+
+		<div class="table-responsive">
+			<table class="table table-hover table-bordered bg-white shadow-sm">
+				<thead class="table-light">
+					<tr>
+						<th>#ID</th>
+						<th>Nom</th>
+						<th>Dernier nettoyage</th>
+						<th>Chargements depuis</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for camion in camions %}
+						<tr>
+							<td>{{ camion.id }}</td>
+							<td>{{ camion.nom }}</td>
+							<td>{{ camion.dernierNettoyage|date('d/m/Y') }}</td>
+							<td>{{ camion.nbChargementsDepuisDernierNettoyage }}</td>
+							<td>
+								<span class="badge bg-warning text-dark">En maintenance</span>
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="5" class="text-center text-muted">Aucun camion en maintenance actuellement</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</main>
+{% endblock %}

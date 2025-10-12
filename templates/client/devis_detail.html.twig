@@ -1,0 +1,107 @@
+{# templates/client/devis_detail.html.twig #}
+
+{% block title %}Détail Du Devis
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+
+{% block page_title %}
+	<h1 class="mb-4">📝 Détail Du Devis :
+		{{ devis.numDevis }}</h1>
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<div class="container-fluid">
+		<main class="flex-grow-1 p-4">
+			<div class="mb-4">
+				<p>
+					<strong>Date :</strong>
+					{{ devis.date|date('d/m/Y') }}</p>
+				<p>
+					<strong>Status :</strong>
+					{% if devis.status == 'en_attente' %}
+						<span class="badge bg-warning text-dark">En attente</span>
+					{% elseif devis.status == 'Accepter' %}
+						<span class="badge bg-success">Validé</span>
+					{% elseif devis.status == 'Refuser' %}
+						<span class="badge bg-secondary">Rejeté</span>
+					{% else %}
+						<span class="badge bg-secondary">Inconnu</span>
+					{% endif %}
+				</p>
+			</div>
+			<h4>Produits</h4>
+			<div class="table-responsive">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>Produit</th>
+							<th>Quantité</th>
+							<th>Prix unitaire</th>
+							<th>Prix avec marge</th>
+							<th>Ristourne</th>
+							<th>Total</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for ligne in devis.lignes %}
+							<tr>
+								<td>{{ ligne.produit.nomProduit }}</td>
+								<td>{{ ligne.quantiteProduit }}</td>
+								<td>{{ ligne.produit.prixProduit|number_format(2, ',', ' ') }}
+									€</td>
+								{% set marge = ligne.produit.marge is defined ? ligne.produit.marge : 0.2 %}
+								<td>{{ (ligne.produit.prixProduit * (1 + marge))|number_format(2, ',', ' ') }}
+									€</td>
+								<td>
+									{% if ligne.remiseProduit != 0 %}
+										{{ ligne.remiseProduit }}%
+									{% else %}
+										-
+									{% endif %}
+								</td>
+								<td>
+									{% set prixFinal = ligne.produit.prixProduit * (1 + marge) %}
+									{% set total = ligne.quantiteProduit * prixFinal * (1 - ligne.remiseProduit / 100) %}
+									{{ total|number_format(2, ',', ' ') }}
+									€
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			<div class="text-end fw-bold mt-4">
+				<p>Total HT :
+					{{ devis.total_ht|number_format(2, ',', ' ') }}
+					€</p>
+				<p>TVA (20%) :
+					{{ (devis.total_ht * 0.20)|number_format(2, ',', ' ') }}
+					€</p>
+				<p>Total TTC :
+					{{ (devis.total_ht * 1.20)|number_format(2, ',', ' ') }}
+					€</p>
+			</div>
+			<hr class="my-4">
+			<h4>💬 Commentaire</h4>
+			<div class="mb-3">
+				<div class="form-control" readonly>
+					{{ devis.commentaire ?? 'Aucun Commentaire.' }}
+				</div>
+			</div>
+
+		</main>
+	</div>
+
+
+{% endblock %}

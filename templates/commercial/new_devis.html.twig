@@ -1,0 +1,163 @@
+{# templates/commercial/new_devis.html.twig #}
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Nouveau Devis
+{% endblock %}
+{% block page_title %}📝 Créer Un Nouveau Devis
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'commercial/asideCommercial/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'commercial/asideCommercial/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main class="flex-fill overflow-auto p-4 mb-4" role="main">
+		<form
+			method="post" action="{{ path('commercial_devis_new') }}">
+			{# Protection CSRF : vérifie que le token est valide avant traitement du formulaire #}
+			<input type="hidden" name="_token" value="{{ csrf_token('commercial_devis_new') }}">
+			<div class="mb-3">
+				<label for="client" class="form-label">Nom du client</label>
+				<input type="text" class="form-control" id="client" name="client" required>
+			</div>
+
+			<div class="mb-3">
+				<label for="dateLivraison" class="form-label">Date de livraison</label>
+				<input type="date" class="form-control" id="dateLivraison" name="dateLivraison" required>
+			</div>
+
+			<div class="mb-3">
+				<label for="distance_km" class="form-label">Distance (km)</label>
+				<input type="number" min="0" step="0.01" class="form-control" id="distance_km" name="distance_km" required>
+			</div>
+
+			<div class="mb-3">
+				<label for="type_transport" class="form-label">Type de transport</label>
+				<select class="form-select" id="type_transport" name="type_transport" required>
+					<option value="vrac">Vrac</option>
+					<option value="palette_minoterie">Palette Minoterie</option>
+					<option value="palette_entrepot">Palette Entrepôt</option>
+				</select>
+			</div>
+
+			<div class="mb-3">
+				<label for="frais_livraison" class="form-label">Frais de Livraison (€)</label>
+				<input type="text" readonly class="form-control-plaintext fw-bold" id="frais_livraison" name="frais_livraison" value="0.00 €">
+			</div>
+
+			<div class="mb-3">
+				<label for="ristourne_globale" class="form-label">Ristourne Globale (%)</label>
+				<input type="number" min="0" max="100" step="0.01" class="form-control" id="ristourne_globale" name="ristourne_globale" value="0" required>
+			</div>
+
+			<div class="mb-3">
+				<label for="status" class="form-label">Statut</label>
+				<select class="form-select" id="status" name="status" required>
+					<option value="A traiter">A traiter</option>
+					<option value="En cours">En cours</option>
+					<option value="Mes En cours">Mes En cours</option>
+					<option value="Terminé">Terminé</option>
+				</select>
+			</div>
+
+			<hr class="my-4">
+			<h5 class="mb-3">Articles</h5>
+
+			<div id="articles-container">
+				<div class="row g-3 article-item mb-3">
+					<div class="col-md-4">
+						<input type="text" class="form-control" name="articles[0][name]" placeholder="Nom de l'article" required>
+					</div>
+					<div class="col-md-2">
+						<input type="number" step="any" class="form-control" name="articles[0][quantity]" placeholder="Quantité" required>
+					</div>
+					<div class="col-md-2">
+						<input type="number" step="any" class="form-control" name="articles[0][price_unit]" placeholder="Prix unitaire (€)" required>
+					</div>
+					<div class="col-md-2">
+						<input type="number" step="any" class="form-control" name="articles[0][ristourne]" placeholder="Ristourne %">
+					</div>
+					<div class="col-md-2">
+						<input type="number" step="any" class="form-control" name="articles[0][marge]" placeholder="Marge %">
+					</div>
+					<div class="col-md-12 text-end">
+						<button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.article-item').remove()">Supprimer cet article</button>
+					</div>
+				</div>
+			</div>
+
+			<button type="button" class="btn btn-outline-primary mb-4" onclick="addArticle()">Ajouter un article</button>
+
+			<div>
+				<button type="submit" class="btn btn-success">Créer le devis</button>
+				<a href="{{ path('commercial_devis') }}" class="btn btn-secondary">Annuler</a>
+			</div>
+		</form>
+	</main>
+
+	<script>
+		const paramsLivraison = {{ params|json_encode|raw }};
+
+const typeTransportSelect = document.getElementById('type_transport');
+const distanceInput = document.getElementById('distance_km');
+const fraisLivraisonInput = document.getElementById('frais_livraison');
+
+function calculerFraisLivraison() {
+const type = typeTransportSelect.value;
+const distance = parseFloat(distanceInput.value) || 0;
+let frais = 0;
+
+if (distance <= 0) {
+fraisLivraisonInput.value = "0.00 €";
+return;
+}
+
+switch (type) {
+case 'vrac': frais = (paramsLivraison.coutKilometreVrac * distance) + paramsLivraison.fraisFixeVrac;
+break;
+case 'palette_minoterie': frais = (paramsLivraison.coutKilometrePaletteMinoterie * distance) + paramsLivraison.fraisFixePaletteMinoterie;
+break;
+case 'palette_entrepot': frais = (paramsLivraison.coutKilometrePaletteEntrepot * distance) + paramsLivraison.baseFraisFixeEntrepot;
+break;
+default: frais = 0;
+}
+
+fraisLivraisonInput.value = frais.toFixed(2) + " €";
+}
+
+typeTransportSelect.addEventListener('change', calculerFraisLivraison);
+distanceInput.addEventListener('input', calculerFraisLivraison);
+
+let articleIndex = 1;
+function addArticle() {
+const container = document.getElementById('articles-container');
+const row = document.createElement('div');
+row.className = 'row g-3 article-item mb-3';
+row.innerHTML = `
+		<div class="col-md-4">
+			<input type="text" class="form-control" name="articles[${articleIndex}][name]" placeholder="Nom de l'article" required>
+		</div>
+		<div class="col-md-2">
+			<input type="number" step="any" class="form-control" name="articles[${articleIndex}][quantity]" placeholder="Quantité" required>
+		</div>
+		<div class="col-md-2">
+			<input type="number" step="any" class="form-control" name="articles[${articleIndex}][price_unit]" placeholder="Prix unitaire (€)" required>
+		</div>
+		<div class="col-md-2">
+			<input type="number" step="any" class="form-control" name="articles[${articleIndex}][ristourne]" placeholder="Ristourne (%)" value="0">
+		</div>
+		<div class="col-md-2">
+			<input type="number" step="any" class="form-control" name="articles[${articleIndex}][marge]" placeholder="Marge (%)" value="20">
+		</div>
+		<div class="col-md-12 text-end">
+			<button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.article-item').remove()">Supprimer cet article</button>
+		</div>`;
+container.appendChild(row);
+articleIndex++;
+}
+	</script>
+{% endblock %}

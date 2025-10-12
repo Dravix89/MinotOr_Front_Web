@@ -1,0 +1,60 @@
+{# templates/client/factures.html.twig #}
+
+{% block title %}Mes Factures
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+{% block page_title %}📄 Mes Factures
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+
+
+	<main class="flex-grow-1 p-4">
+		{% if factures is empty %}
+			<div class="alert alert-info">Aucune facture disponible pour le moment.</div>
+		{% else %}
+			<div class="table-responsive">
+				<table class="table table-bordered table-striped align-middle">
+					<thead class="table-light">
+						<tr>
+							<th>Numéro</th>
+							<th>Date</th>
+							<th>Montant TTC</th>
+							<th>Téléchargement</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for facture in factures %}
+							<tr>
+								<td>{{ facture.numero }}</td>
+								<td>{{ facture.date|date('d/m/Y') }}</td>
+								<td>{{ facture.montant_ttc|number_format(2, ',', ' ') }}
+									€</td>
+								<td>
+									<a href="{{ path('client_facture_generate', { id: facture.numero|replace({'F': ''}) }) }}" class="btn btn-outline-danger btn-sm" target="_blank">
+										<img src="{{ asset('images/pdf-logo.png') }}" alt="PDF" style="width: 20px; margin-right: 5px;">
+										Télécharger
+									</a>
+
+								</td>
+
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% endif %}
+	</main>
+
+{% endblock %}

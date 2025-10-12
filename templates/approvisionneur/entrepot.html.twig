@@ -1,0 +1,144 @@
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Gestion Entrepôts
+{% endblock %}
+
+{% block page_title %}🏭 Gestion Entrepôts
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'approvisionneur/asideApprovisionneur/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'approvisionneur/asideApprovisionneur/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main>
+
+		<!-- SECTION TABLEAU -->
+		<div id="ListeEntrepots" aria-live="polite">
+			<div class="d-flex justify-content-center gap-4 mb-4">
+				<div>
+					<label for="invoice_id" class="form-label">
+						<strong>Invoice ID</strong>
+					</label>
+					<input type="text" id="invoice_id" name="invoice_id" class="form-control" style="min-width: 150px;" aria-label="Filtrer par ID d'entrepôt" disabled>
+				</div>
+				<div>
+					<label for="date" class="form-label">
+						<strong>Date</strong>
+					</label>
+					<input type="date" id="date" name="date" class="form-control" style="min-width: 150px;" aria-label="Filtrer par date" disabled>
+				</div>
+			</div>
+
+			<div id="loadingMessage" class="text-center my-4" role="status" aria-live="assertive">
+				<strong>Chargement...</strong>
+			</div>
+
+			<table id="entrepotTable" class="table table-bordered table-hover align-middle" style="display:none;">
+				<thead class="table-light">
+					<tr>
+						<th scope="col">✓</th>
+						<th scope="col">ID</th>
+						<th scope="col">Nom</th>
+						<th scope="col">Localisation</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% if entrepots is not empty %}
+						{% for entrepot in entrepots %}
+							<tr tabindex="0" onclick="window.location.href='{{ path('entrepot_show', { id: entrepot.id }) }}'" onkeydown="if(event.key === 'Enter' || event.key === ' ') window.location.href='{{ path('entrepot_show', { id: entrepot.id }) }}'">
+								<td>
+									<input type="checkbox" aria-label="Sélectionner entrepôt {{ entrepot.nomEntrepot }}" onclick="event.stopPropagation();">
+
+								</td>
+								<td>{{ entrepot.id }}</td>
+								<td>
+									<a href="{{ path('entrepot_show', { id: entrepot.id }) }}" class="text-body text-decoration-none">
+										{{ entrepot.nomEntrepot }}
+									</a>
+								</td>
+								<td>
+									{% if entrepot.adresse is not null %}
+										{{ entrepot.adresse.numRue }}
+										{{ entrepot.adresse.nomRue }},<br>
+										{{ entrepot.adresse.codePostal }}
+										{{ entrepot.adresse.ville }},<br>
+										France
+									{% else %}
+										<em>Adresse non disponible</em>
+									{% endif %}
+								</td>
+							</tr>
+						{% endfor %}
+					{% else %}
+						<tr>
+							<td colspan="4" class="text-center">Aucun Entrepôt à Afficher !</td>
+						</tr>
+					{% endif %}
+				</tbody>
+			</table>
+		</div>
+	</main>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script>
+		// Simule le chargement de l'API
+window.addEventListener('DOMContentLoaded', () => {
+const invoiceInput = document.getElementById('invoice_id');
+const dateInput = document.getElementById('date');
+const loadingMessage = document.getElementById('loadingMessage');
+const table = document.getElementById('entrepotTable');
+const tbody = table.querySelector('tbody');
+
+// Désactive les inputs pendant le chargement
+invoiceInput.disabled = true;
+dateInput.disabled = true;
+
+setTimeout(() => {
+loadingMessage.style.display = 'none';
+table.style.display = '';
+invoiceInput.disabled = false;
+dateInput.disabled = false;
+}, 1000);
+
+// Filtrage simple côté client
+function filterTable() {
+const filterInvoice = invoiceInput.value.toLowerCase();
+const filterDate = dateInput.value; // Pas encore implémenté côté client
+
+let visibleCount = 0;
+Array.from(tbody.rows).forEach(row => {
+const idText = row.cells[1].textContent.toLowerCase();
+const matchInvoice = idText.includes(filterInvoice);
+
+if (matchInvoice) {
+row.style.display = '';
+visibleCount++;
+} else {
+row.style.display = 'none';
+}
+});
+
+const noDataRow = tbody.querySelector('.no-data');
+if (visibleCount === 0) {
+if (! noDataRow) {
+const tr = document.createElement('tr');
+tr.classList.add('no-data');
+tr.innerHTML = '<td colspan="4" class="text-center">Aucun Entrepôt ne correspond à la recherche.</td>';
+tbody.appendChild(tr);
+}
+} else if (noDataRow) {
+tbody.removeChild(noDataRow);
+}
+}
+
+invoiceInput.addEventListener('input', filterTable);
+dateInput.addEventListener('input', filterTable);
+});
+	</script>
+{% endblock %}

@@ -1,0 +1,254 @@
+{# templates/commercial/devis.html.twig #}
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Gestion Des Devis
+{% endblock %}
+
+
+{% block page_title %}📋 Gestion Des Devis
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'commercial/asideCommercial/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'commercial/asideCommercial/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main class="flex-fill overflow-auto p-4 mb-4" role="main">
+
+		<div class="text-end mt-4 mb-3">
+			<a href="/commercial/devis/new" class="btn btn-primary">➕ Ajouter Un Devis</a>
+		</div>
+
+		<ul class="nav nav-tabs" id="devisTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="a-traiter-tab" data-bs-toggle="tab" data-bs-target="#a-traiter" type="button" role="tab" aria-controls="a-traiter" aria-selected="true">À Traiter</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="mes-devis-tab" data-bs-toggle="tab" data-bs-target="#mes-devis" type="button" role="tab" aria-controls="mes-devis" aria-selected="false" tabindex="-1">Mes Devis en Cours</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="termine-tab" data-bs-toggle="tab" data-bs-target="#termine" type="button" role="tab" aria-controls="termine" aria-selected="false" tabindex="-1">Terminé</button>
+			</li>
+		</ul>
+
+		<div
+			class="tab-content mt-4">
+			{# === À Traiter === #}
+			<div class="tab-pane fade show active" id="a-traiter" role="tabpanel">
+				<div id="message-container" role="alert" aria-live="assertive" style="display:none; margin-bottom:1rem;"></div>
+				<table class="table table-bordered table-hover align-middle w-100">
+					<thead class="table-light">
+						<tr>
+							<th>Devis ID</th>
+							<th>Client ID</th>
+							<th>Commercial ID</th>
+							<th>Date Création</th>
+							<th>Montant (€)</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for devis in devisByStatus.a_traiter %}
+							<tr>
+								<td class="text-center">{{ devis.id }}</td>
+								<td class="text-center">{{ devis.client_id }}</td>
+								<td class="text-center">{{ devis.commercial_id }}</td>
+								<td class="text-center">{{ devis.date_creation }}</td>
+								<td class="text-center">
+									{{ devis.montant_total|number_format(2, '.', ' ') }}
+									€
+								</td>
+								<td class="text-center">
+									<form method="post" action="/commercial/devis/take-in-charge/{{ devis.id }}">
+										<input type="hidden" name="_token" value="{{ csrf_token('take_in_charge_' ~ devis.id) }}">
+										<button type="submit" class="btn btn-sm btn-primary mb-1" aria-label="Prendre en charge le devis {{ devis.id }}" data-csrf="{{ csrf_token('take_in_charge_' ~ devis.id) }}">
+											Prendre en charge
+										</button>
+									</form>
+								</td>
+							</tr>
+						{% else %}
+							<tr>
+								<td colspan="6" class="text-center">Aucun devis à traiter</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			{# === Mes Devis En Cours === #}
+			<div class="tab-pane fade" id="mes-devis" role="tabpanel">
+				<table class="table table-bordered table-hover align-middle w-100">
+					<thead class="table-light">
+						<tr>
+							<th>Devis ID</th>
+							<th>Frais Livraison (€)</th>
+							<th>Ristourne Globale</th>
+							<th>Date Livraison</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% set mes_devis = devisByStatus.mes_devis ?? [] %}
+						{% if mes_devis %}
+							{% for devis in mes_devis %}
+								<tr>
+									<td class="text-center">{{ devis.id }}</td>
+									<td class="text-center">{{ devis.delivery_fee|default(0)|number_format(2, '.', ' ') }}
+										€</td>
+									<td class="text-center">{{ devis.global_discount is defined ? devis.global_discount ~ ' €' : '—' }}</td>
+									<td class="text-center">{{ devis.delivery_date ?? '—' }}</td>
+									<td class="text-center">
+										<a href="/commercial/devis/edit/{{ devis.id }}" class="btn btn-sm btn-warning mb-1">✏️ Modifier</a>
+										<form method="post" action="/commercial/devis/finish/{{ devis.id }}">
+											<input type="hidden" name="_token" value="{{ csrf_token('finish' ~ devis.id) }}">
+											<button type="submit" class="btn btn-sm btn-success mb-1">✔️ Terminer</button>
+										</form>
+										<form method="post" action="/commercial/devis/send-email/{{ devis.id }}">
+											<input type="hidden" name="_token" value="{{ csrf_token('send_email' ~ devis.id) }}">
+											<button type="submit" class="btn btn-sm btn-secondary">📧 Envoyer</button>
+										</form>
+									</td>
+								</tr>
+							{% endfor %}
+						{% else %}
+							<tr>
+								<td colspan="5" class="text-center">—</td>
+							</tr>
+						{% endif %}
+					</tbody>
+				</table>
+			</div>
+
+			{# === Terminé === #}
+			<div class="tab-pane fade" id="termine" role="tabpanel">
+				<table class="table table-bordered table-hover align-middle w-100">
+					<thead class="table-light">
+						<tr>
+							<th>Devis ID</th>
+							<th>Frais Livraison (€)</th>
+							<th>Date Livraison</th>
+							<th>Commande Réalisée ?</th>
+							<th>Email Envoyé ?</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% set termine = devisByStatus.termine ?? [] %}
+						{% if termine %}
+							{% for devis in termine %}
+								<tr>
+									<td>
+										<strong>{{ devis.reference }}</strong><br>{{ devis.client_name }}
+									</td>
+									<td class="text-center">{{ devis.delivery_fee|default(0) }}</td>
+									<td class="text-center">{{ devis.delivery_date|date('d/m/Y') }}</td>
+									<td class="text-center">{{ devis.converted_to_order is defined and devis.converted_to_order ? '✅' : '—' }}</td>
+									<td class="text-center">{{ devis.email_sent is defined and devis.email_sent ? '📨 Oui' : '—' }}</td>
+								</tr>
+							{% endfor %}
+						{% else %}
+							<tr>
+								<td colspan="5" class="text-center">—</td>
+							</tr>
+						{% endif %}
+					</tbody>
+				</table>
+			</div>
+		</main>
+
+
+		<script>
+			function showMessage(msg, isError = false) {
+const container = document.getElementById('message-container');
+container.textContent = msg;
+container.style.display = 'block';
+container.className = isError ? 'alert alert-danger alert-dismissible' : 'alert alert-success alert-dismissible';
+}
+
+const aTraiterTable = document.querySelector('#a-traiter table tbody');
+const mesDevisTableBody = document.querySelector('#mes-devis table tbody');
+if (! aTraiterTable || ! mesDevisTableBody) 
+return;
+
+
+
+function createMesDevisRow({reference, clientName, deliveryFee, deliveryDate}) {
+const tr = document.createElement('tr');
+tr.innerHTML = `
+    <td>
+      <strong>${reference}</strong><br><span class="client-name">${clientName}</span>
+    </td>
+    <td class="text-center">${deliveryFee}</td>
+    <td class="text-center">—</td>
+    <td class="text-center">${deliveryDate}</td>
+    <td class="text-center">
+      <a href="/commercial/devis/edit/${reference}" class="btn btn-sm btn-warning mb-1" aria-label="Modifier le devis ${reference}">✏️ Modifier</a>
+      <form method="post" action="/commercial/devis/finish/${reference}" class="d-inline">
+        <button type="submit" class="btn btn-sm btn-success mb-1" aria-label="Terminer le devis ${reference}">✔️ Terminer</button>
+      </form>
+      <form method="post" action="/commercial/devis/send-email/${reference}" class="d-inline">
+        <button type="submit" class="btn btn-sm btn-secondary" aria-label="Envoyer email pour le devis ${reference}">📧 Envoyer</button>
+      </form>
+    </td>
+  `;
+return tr;
+}
+
+aTraiterTable.querySelectorAll('tr').forEach(row => {
+const btn = row.querySelector('button');
+if (! btn) 
+return;
+
+
+
+btn.addEventListener('click', async e => {
+e.preventDefault();
+btn.disabled = true;
+
+const cells = row.querySelectorAll('td');
+const strong = cells[0].querySelector('strong');
+const reference = strong ? strong.textContent.trim() : '';
+const clientSpan = cells[0].querySelector('.client-name');
+const clientName = clientSpan ? clientSpan.textContent.trim() : '';
+const deliveryFee = cells[1] ? cells[1].textContent.trim() : '0';
+const deliveryDate = cells[3] ? cells[3].textContent.trim() : '—';
+
+
+const csrfToken = btn.getAttribute('data-csrf');
+
+try {
+const response = await fetch (`/commercial/devis/take-in-charge/${reference}`, {
+method: 'POST',
+headers: {
+'X-Requested-With': 'XMLHttpRequest',
+'Content-Type': 'application/x-www-form-urlencoded'
+},
+body: new URLSearchParams(
+{'_token': csrfToken}
+)
+});
+
+const data = await response.json();
+
+if (data.success) {
+showMessage (`Devis ${reference} pris en charge !`);
+row.remove();
+const newRow = createMesDevisRow({reference, clientName, deliveryFee, deliveryDate});
+mesDevisTableBody.appendChild(newRow);
+} else {
+showMessage('Erreur lors de la prise en charge du devis.', true);
+btn.disabled = false;
+}
+} catch (error) {
+showMessage('Erreur réseau ou serveur.', true);
+console.error(error);
+btn.disabled = false;
+}
+});
+});
+		</script>
+
+	{% endblock %}

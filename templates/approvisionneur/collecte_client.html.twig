@@ -1,0 +1,188 @@
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Gestion Collecte Client
+{% endblock %}
+
+{% block page_title %}🤝 Gestion Collecte Client
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'approvisionneur/asideApprovisionneur/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'approvisionneur/asideApprovisionneur/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<div class="container-fluid">
+		<main>
+			<div class="overflow-auto">
+				<ul class="nav nav-tabs" id="tabs-client" role="tablist">
+					<li class="nav-item" role="presentation">
+						<button class="nav-link active" id="saisie-tab" data-bs-toggle="tab" data-bs-target="#saisie" type="button" role="tab">Saisie Collecte</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="liste-tab" data-bs-toggle="tab" data-bs-target="#liste" type="button" role="tab">Liste Collectes</button>
+					</li>
+				</ul>
+			</div>
+
+			<div class="tab-content mt-3">
+				<div class="tab-pane fade show active" id="saisie" role="tabpanel">
+					<div class="card p-4">
+						<h2 class="text-center mb-4">Saisie Livraison Client</h2>
+
+
+						<form
+							method="post" action="{{ path('collecte_client_saisie') }}" enctype="multipart/form-data" novalidate>
+							{# Token CSRF pour sécuriser la soumission du formulaire collecte_client_saisie #}
+							<input type="hidden" name="_token" value="{{ csrf_token('collecte_client_saisie') }}">
+							<div class="row">
+								<div class="col-md-6">
+									<label for="client" class="form-label mb-1">Client</label>
+									<select class="form-select form-select-sm" id="client" name="client" required>
+										<option value="">-- Sélectionner un client --</option>
+										{% for client in clients %}
+											<option value="{{ client.id }}">{{ client.nomEntreprise }}</option>
+										{% endfor %}
+									</select>
+								</div>
+
+								<div class="col-md-6 mb-3">
+									<label for="produit" class="form-label mb-1">Produit</label>
+									<select class="form-select form-select-sm" id="produit" name="produit" required>
+										<option value="">-- Sélectionner un produit --</option>
+										{% for produit in produits %}
+											<option value="{{ produit.id }}">{{ produit.nomProduit }}</option>
+
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-md-6 mb-3">
+									<label for="facture" class="form-label mb-1">Facture</label>
+									<input type="file" class="form-control form-control-sm" id="facture" name="facture" accept=".pdf">
+									<div id="ajouterFacture" class="text-primary mt-1 small" style="cursor:pointer;"></div>
+								</div>
+								<div class="col-md-6 mb-3">
+									<label for="dateCommande" class="form-label mb-1">Date de Commande</label>
+									<input type="date" class="form-control form-control-sm" id="dateCommande" name="dateCommande" required>
+								</div>
+								<div class="col-md-6 mb-3">
+									<label for="dateLivraison" class="form-label mb-1">Date de Livraison</label>
+									<input type="date" class="form-control form-control-sm" id="dateLivraison" name="dateLivraison" required>
+								</div>
+								<div class="col-12">
+									<button type="submit" class="btn btn-primary ">Enregistrer</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<div class="tab-pane fade" id="liste" role="tabpanel">
+					<h2 class="text-center mb-3">Historique des Livraisons Client</h2>
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover align-middle">
+							<thead class="table-light">
+								<tr>
+									<th>ID</th>
+									<th>Client</th>
+									<th>Produit</th>
+									<th>Date Commande</th>
+									<th>Date Livraison</th>
+									<th>Facture</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for livraison in livraisons %}
+									<tr>
+										<td>
+											{{ livraison.id }}
+										</td>
+										{# Ajout de l'ID #}
+										{# Client - dans transaction.client.nomEntreprise #}
+										<td>
+											{{ livraison.transaction.client.nomEntreprise }}
+										</td>
+
+										{# Produit - concatène les noms des produits dans transaction.estContenus #}
+										<td>
+											{{ livraison.transaction.estContenus|map(item => item.produit.nomProduit)|join(', ') }}
+										</td>
+
+										{# Date Commande - prends la date du premier produit (transaction.estContenus[0].date) ou 'N/A' #}
+										<td>
+											{{ livraison.transaction.estContenus[0].date is defined ? (livraison.transaction.estContenus[0].date|date('Y-m-d')) : 'N/A' }}
+										</td>
+
+										{# Date Livraison #}
+										<td>
+											{{ livraison.dateLivraison|date('Y-m-d') }}
+										</td>
+
+										{# Facture - pas dans ton JSON, donc on met juste un "-" #}
+										<td>
+											📎
+										</td>
+									</tr>
+								{% else %}
+									<tr>
+										<td colspan="6" class="text-center text-muted">Aucune livraison enregistrée.</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</main>
+</div>
+<script>
+	// Quand on clique sur le texte "+ Ajouter une facture", on ouvre le sélecteur de fichier caché
+document.getElementById('ajouterFacture').addEventListener('click', function () {
+document.getElementById('facture').click();
+});
+
+// Validation simple avant soumission du formulaire
+document.getElementById('formLivraisonClient').addEventListener('submit', function (event) {
+const client = this.client.value.trim();
+const produit = this.produit.value.trim();
+const dateCommande = this.dateCommande.value;
+const dateLivraison = this.dateLivraison.value;
+
+// Vérifie que le nom du client n'est pas vide
+if (! client) {
+alert('Merci de renseigner le nom du client.');
+event.preventDefault(); // Empêche l'envoi du formulaire
+return false;
+}
+// Vérifie que le produit livré n'est pas vide
+if (! produit) {
+alert('Merci de renseigner le produit livré.');
+event.preventDefault();
+return false;
+}
+// Vérifie que la date de commande est bien renseignée
+if (! dateCommande) {
+alert('Merci de renseigner la date de commande.');
+event.preventDefault();
+return false;
+}
+// Vérifie que la date de livraison est bien renseignée
+if (! dateLivraison) {
+alert('Merci de renseigner la date de livraison.');
+event.preventDefault();
+return false;
+}
+// Compare les dates : la date de livraison ne doit pas être avant la date de commande
+if (new Date(dateLivraison) < new Date(dateCommande)) {
+alert('La date de livraison ne peut pas être antérieure à la date de commande.');
+event.preventDefault();
+return false;
+}
+});
+</script>{% endblock %}

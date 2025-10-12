@@ -1,0 +1,75 @@
+{# templates/client/commandes.html.twig #}
+
+
+{% block title %}Mes Commandes
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+
+{% block page_title %}📦 Mes Commandes
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+
+	<div class="container-fluid">
+		<main>
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover align-middle">
+					<thead class="table-light">
+						<tr>
+							<th>Numéro Commande</th>
+							<th>Date De Création</th>
+							<th>Livraison</th>
+							<th>Livraison Status</th>
+							<th>Status Paiement</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for commande in commandes %}
+							<tr>
+								<td>C00{{ commande.id }}</td>
+								<td>{{ commande.dateCreation|date('d/m/Y') }}</td>
+								<td>{{ commande.montantTotal }}
+									€</td>
+								<td>
+									{% if commande.statutLivraison is defined and commande.statutLivraison == 'livree' %}
+										Livrée
+									{% else %}
+										En cours
+									{% endif %}
+								</td>
+								<td>
+									{% if commande.statutPaiement == 'Payé' %}
+										<span class="badge bg-success">Payé</span>
+									{% else %}
+										<span class="badge bg-danger">Non Payé</span>
+									{% endif %}
+								</td>
+								<td>
+									<a href="{{ path('client_commande_detail', { id: commande.id }) }}" class="btn btn-sm btn-outline-primary">Détail</a>
+								</td>
+							</tr>
+						{% else %}
+							<tr>
+								<td colspan="7" class="text-center text-muted">Aucune commande trouvée.</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</main>
+
+	</div>
+
+{% endblock %}

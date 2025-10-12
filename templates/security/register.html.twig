@@ -1,0 +1,154 @@
+{# templates/security/register.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% set old = old is defined and old is iterable ? old : {} %}
+
+{% block title %}Inscription Client
+{% endblock %}
+
+{% block body %}
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:900&display=swap" rel="stylesheet">
+
+	<style>
+		html,
+		body {
+			background: url('/images/bg-login.jpg') no-repeat center center fixed;
+			background-size: cover;
+			margin: 0;
+			font-family: sans-serif;
+			height: 100%;
+		}
+
+		.register-container {
+			background: rgba(255, 255, 255, 0.85);
+			padding: 1.5rem;
+			border-radius: 12px;
+			max-width: 600px;
+			margin: auto;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			min-height: auto;
+		}
+		@media(max-width: 768px) {
+			.register-container {
+				margin: 5vh 1rem;
+				padding: 1.5rem;
+			}
+		}
+
+		h1 {
+			font-family: 'Montserrat', sans-serif;
+			font-weight: 900;
+			text-align: center;
+			margin-bottom: 1.5rem;
+		}
+
+		.my-gradient-btn {
+			background: linear-gradient(#f9f8f4, #f3edd9, #e8dfb8, rgba(191, 129, 37, 0.76));
+			font-weight: bold;
+			border: none;
+			padding: 0.75rem 1.5rem;
+			border-radius: 8px;
+			transition: all 0.3s ease;
+			text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+			color: #4a3c0a;
+		}
+
+		.my-gradient-btn:hover {
+			background: linear-gradient(#f7f6f0, #ebe5cc, #d8c88f, rgb(181, 124, 33));
+			transform: translateY(-2px);
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
+			cursor: pointer;
+			color: #3d3108;
+		}
+
+		.my-gradient-btn:active {
+			background: linear-gradient(#f4f3ed, #e3ddc0, #cbbf7b, #8d6215);
+			transform: translateY(0);
+			box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+			color: #2f2506;
+		}
+	</style>
+
+	<header class="d-flex justify-content-between align-items-center p-3">
+		<nav>
+			<a href="/" class="me-3 text-decoration-none fw-bold text-dark">Accueil</a>
+			<a href="/produits" class="me-3 text-decoration-none fw-bold text-dark">Produits</a>
+			<a href="{{ path('app_login_client') }}" class="me-3 text-decoration-none fw-bold text-dark">Espace-Client</a>
+			{% if app.user %}
+				<a href="{{ path('app_logout') }}" class="text-decoration-none fw-bold text-danger">Déconnexion</a>
+			{% endif %}
+		</nav>
+	</header>
+
+	<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+		<div class="register-container">
+			<h1>Créer Un Compte Client</h1>
+
+
+			{% if error is defined and error %}
+				<div class="alert alert-danger">{{ error }}</div>
+			{% endif %}
+
+
+			<form method="POST" action="{{ path('app_register') }}" style="max-width: 500px; margin: auto; padding: 20px; background: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-family: Arial, sans-serif;">
+
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+				<div style="margin-bottom: 15px;">
+					<label for="username" style="display:block; margin-bottom:5px; font-weight: bold;">Email</label>
+					<input id="username" type="email" name="username" value="{{ old.username ?? '' }}" placeholder="votre.email@example.com" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+				</div>
+
+				<div style="margin-bottom: 15px;">
+					<label for="password" style="display:block; margin-bottom:5px; font-weight: bold;">Mot de passe</label>
+					<input id="password" type="password" name="password" placeholder="Votre mot de passe" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+				</div>
+
+				<div style="margin-bottom: 15px;">
+					<label for="nom" style="display:block; margin-bottom:5px; font-weight: bold;">Nom</label>
+					<input id="nom" type="text" name="nom" value="{{ old.nom ?? '' }}" placeholder="Votre nom" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+				</div>
+
+				<div style="margin-bottom: 15px;">
+					<label for="prenom" style="display:block; margin-bottom:5px; font-weight: bold;">Prénom</label>
+					<input id="prenom" type="text" name="prenom" value="{{ old.prenom ?? '' }}" placeholder="Votre prénom" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+				</div>
+
+				<div style="margin-bottom: 15px;">
+					<label for="telephone" style="display:block; margin-bottom:5px; font-weight: bold;">Téléphone</label>
+					<input id="telephone" type="tel" name="telephone" value="{{ old.telephone ?? '' }}" placeholder="Ex: +33 6 12 34 56 78" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+				</div>
+
+				<div style="margin-bottom: 15px;">
+					<label for="nomEntreprise" style="display:block; margin-bottom:5px; font-weight: bold;">Nom de l'entreprise</label>
+					<input id="nomEntreprise" type="text" name="nomEntreprise" value="{{ old.nomEntreprise ?? '' }}" placeholder="Nom de votre entreprise" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+				</div>
+
+				<div style="margin-bottom: 15px;">
+					<label for="siret" style="display:block; margin-bottom:5px; font-weight: bold;">Numéro SIRET</label>
+					<input id="siret" type="text" name="siret" value="{{ old.siret ?? '' }}" placeholder="Ex: 123 456 789 00012" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+				</div>
+
+				<div style="margin-bottom: 20px;">
+					<label for="typeClient" style="display:block; margin-bottom:5px; font-weight: bold;">Type de client</label>
+					<select id="typeClient" name="typeClient" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+						<option value="" disabled {% if old.typeClient is not defined or old.typeClient == '' %} selected {% endif %}>-- Choisir --</option>
+						<option value="Boulanger" {% if old.typeClient is defined and old.typeClient == 'Boulanger' %} selected {% endif %}>Boulanger</option>
+						<option value="Minotier" {% if old.typeClient is defined and old.typeClient == 'Minotier' %} selected {% endif %}>Minotier</option>
+						<option value="Brasserie" {% if old.typeClient is defined and old.typeClient == 'Brasserie' %} selected {% endif %}>Brasserie</option>
+					</select>
+				</div>
+
+				<button type="submit" style="width: 100%; background: #4a90e2; color: white; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
+					S’inscrire
+				</button>
+
+			</form>
+
+
+		</div>
+	</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Dashboard Approvisionneur
+{% endblock %}
+
+{% block page_title %}📊 Dashboard Approvisionneur
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'approvisionneur/asideApprovisionneur/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'approvisionneur/asideApprovisionneur/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main>
+		<div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+			<span id="last-update">✅ Mis à jour le
+			</span>
+			<div class="date-selector" id="date-selector" style="cursor: pointer; position: relative;">
+				30 Derniers Jours ▾
+				<ul id="date-options" style="
+												    display: none;
+												    position: absolute;
+												    top: 100%;
+												    left: 0;
+												    margin: 0;
+												    padding: 0;
+												    list-style: none;
+												    background: white;
+												    border: 1px solid #ccc;
+												    width: max-content;
+												    z-index: 100;
+												  ">
+					<li style="padding: 5px 10px; cursor: pointer;">7 Derniers Jours</li>
+					<li style="padding: 5px 10px; cursor: pointer;">30 Derniers Jours</li>
+					<li style="padding: 5px 10px; cursor: pointer;">90 Derniers Jours</li>
+				</ul>
+			</div>
+			<a href="#" onclick="logout()" class="text-decoration-none fw-bold text-danger">Déconnexion</a>
+		</div>
+
+		<div class="mb-4">
+			<div class="d-flex flex-column flex-md-row gap-3">
+				{% if receptions is not empty %}
+					{% set reception = receptions[0] %}
+					<div class="p-3 border rounded bg-success bg-opacity-25 flex-fill text-center">
+						<div>🛒 Réception</div>
+						<h2>+{{ reception.kg }}kg</h2>
+						<p>Entrepôt N° :
+							{{ reception.entrepotRef }}</p>
+						<p>Produit :
+							{{ reception.produitRef }}</p>
+					</div>
+				{% else %}
+					<div class="p-3 border rounded bg-success bg-opacity-25 flex-fill text-center">
+						<div>🛒 Réception</div>
+						<h2>Aucune réception</h2>
+					</div>
+				{% endif %}
+
+				{% if commandes is not empty %}
+					{% set commande = commandes[0] %}
+					<div class="p-3 border rounded bg-danger bg-opacity-25 flex-fill text-center">
+						<div>📦 Commande</div>
+						<h2>-{{ commande.kg }}kg</h2>
+						<p>Entrepôt N° : 9
+							{{ commande.entrepotRef ?? '' }}</p>
+						<p>Produit :
+							{{ commande.produitRef }}</p>
+					</div>
+				{% else %}
+					<div class="p-3 border rounded bg-danger bg-opacity-25 flex-fill text-center">
+						<div>📦 Commande</div>
+						<h2>Aucune commande</h2>
+					</div>
+				{% endif %}
+			</div>
+		</div>
+		<div class="my-5">
+			<h3 class="text-center mb-4 text-danger">Alertes Stock -100kg</h3>
+			<div class="row row-cols-1 row-cols-md-4 g-3">
+				{% if alerts is empty %}
+					<p class="text-center text-muted">Aucune alerte de stock faible</p>
+				{% endif %}
+
+				{% for alert in alerts %}
+					<div class="col">
+						<div class="card h-100 text-center">
+							<img src="{{ asset('images/AlertIMG.png') }}" alt="Produit {{ alert.produitRef }}" class="card-img-top mx-auto" style="max-height:100px; width:auto; object-fit:contain;">
+							<div class="card-body p-2">
+								<div class="fw-bold">Produit :
+									{{ alert.produitRef }}</div>
+								<div>Qté disponible faible :
+									{{ alert.quantiteDisponible }}
+									kg</div>
+
+								<div class="text-muted">Entrepôt N° :
+									{{ alert.entrepotRef }}</div>
+							</div>
+						</div>
+					</div>
+				{% endfor %}
+
+			</div>
+
+		</div>
+	</main>
+
+	<script>
+		// Mise à jour de la date à chaque chargement
+function formatDate(date) {
+const d = date.getDate().toString().padStart(2, '0');
+const m = (date.getMonth() + 1).toString().padStart(2, '0');
+const y = date.getFullYear();
+const hh = date.getHours().toString().padStart(2, '0');
+const mm = date.getMinutes().toString().padStart(2, '0');
+return `${d}/${m}/${y} ${hh}h${mm}`;
+}
+
+const span = document.getElementById('last-update');
+const now = new Date();
+span.textContent = `✅ Mis à jour le ${
+formatDate(now)
+}`;
+
+// Gestion du dropdown
+const dateSelector = document.getElementById('date-selector');
+const dateOptions = document.getElementById('date-options');
+
+dateSelector.addEventListener('click', () => { // Toggle affichage du menu
+dateOptions.style.display = dateOptions.style.display === 'block' ? 'none' : 'block';
+});
+
+// Clic sur une option met à jour le texte et ferme le menu
+dateOptions.querySelectorAll('li').forEach(item => {
+item.addEventListener('click', (e) => {
+dateSelector.firstChild.textContent = e.target.textContent + ' ▾';
+dateOptions.style.display = 'none';
+
+// Ici tu peux appeler une fonction pour filtrer les données par exemple
+console.log('Période sélectionnée :', e.target.textContent);
+});
+});
+
+// Fermer le menu si on clique en dehors
+document.addEventListener('click', (e) => {
+if (! dateSelector.contains(e.target)) {
+dateOptions.style.display = 'none';
+}
+});
+	</script>
+
+
+	<script>
+		function logout() {
+localStorage.removeItem('jwt_token'); // Supprime le token
+window.location.href = '/login-backoffice'; // Redirige vers la page login
+}
+	</script>
+
+{% endblock %}

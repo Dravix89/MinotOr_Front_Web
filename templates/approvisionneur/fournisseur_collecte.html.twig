@@ -1,0 +1,163 @@
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Gestion Collecte Fournisseur
+{% endblock %}
+
+{% block page_title %}🤝 Gestion Collecte Fournisseur
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'approvisionneur/asideApprovisionneur/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'approvisionneur/asideApprovisionneur/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main class="flex-fill overflow-auto p-4 mb-4" role="main" aria-label="Gestion collecte fournisseur">
+
+		<ul class="nav nav-tabs" id="myTabs" role="tablist">
+			<li class="nav-item" role="presentation">
+				<button class="nav-link active" id="gestion-tab" data-bs-toggle="tab" data-bs-target="#gestion" type="button" role="tab" aria-controls="gestion" aria-selected="true">
+					Livraison Entrepôt
+				</button>
+			</li>
+			<li class="nav-item" role="presentation">
+				<button class="nav-link" id="consultation-tab" data-bs-toggle="tab" data-bs-target="#consultation" type="button" role="tab" aria-controls="consultation" aria-selected="false">
+					Consulter Livraison Entrepôt
+				</button>
+			</li>
+		</ul>
+
+		<div class="tab-content mt-3">
+			<div class="tab-pane fade show active" id="gestion" role="tabpanel" aria-labelledby="gestion-tab">
+				<div class="card p-4">
+					<h2 class="form-title text-center mb-3">Gestion Livraison Entrepôt</h2>
+
+					{# Formulaire avec token CSRF pour sécuriser l'envoi des données contre les attaques CSRF #}
+					<form method="post" enctype="multipart/form-data" novalidate id="formLivraison">
+						<div class="mb-3">
+							<input type="hidden" name="_token" value="{{ csrf_token('livraison_form') }}">
+							<label for="entrepot" class="form-label">Entrepôt À Livrer</label>
+							<select class="form-select form-select-sm" id="entrepot" name="entrepot" required>
+								<option value="" disabled selected>Choisir un entrepôt</option>
+								{% for e in entrepots %}
+									<option value="{{ e.id }}">{{ e.nomEntrepot }}</option>
+
+								{% endfor %}
+							</select>
+
+						</div>
+
+						<div class="mb-3">
+							<label for="camion" class="form-label">Camion</label>
+							<select class="form-select form-select-sm" id="camion" name="camion" required>
+								<option value="" disabled selected>Sélectionner un type de camion</option>
+								{% if typesCamion is empty %}
+									<option disabled>Aucun type de camion disponible</option>
+								{% else %}
+									{% for camion in typesCamion %}
+										{# <option value="{{ camion.id }}">{{ camion.type_vehicule }}</option> #}
+										<option value="{{ camion.id }}">{{ camion.nom }}</option>
+									{% endfor %}
+								{% endif %}
+							</select>
+						</div>
+						<div class="mb-3">
+							<label for="facture" class="form-label">Facture</label>
+							<input type="file" class="form-control form-control-sm" id="facture" name="facture" accept=".pdf" aria-describedby="factureHelp">
+							<div id="factureHelp" class="form-text text-primary small" style="cursor:pointer;" role="button" tabindex="0">+ Ajouter une facture</div>
+						</div>
+
+						<div class="mb-3">
+							<label for="dateCommande" class="form-label">Date De Commande</label>
+							<input type="date" class="form-control form-control-sm" id="dateCommande" name="dateCommande" value="{{ "now"|date('Y-m-d') }}" required>
+						</div>
+
+						<div class="mb-3">
+							<label for="dateLivraison" class="form-label">Date De Livraison</label>
+							<input type="date" class="form-control form-control-sm" id="dateLivraison" name="dateLivraison" value="{{ "now"|date('Y-m-d') }}" required>
+						</div>
+
+						<div class="text-center">
+							<button type="submit" class="btn btn-primary">Enregistrer Livraison</button>
+						</div>
+					</form>
+				</div>
+			</div>
+
+			<div class="tab-pane fade" id="consultation" role="tabpanel" aria-labelledby="consultation-tab">
+				<h2 class="form-title text-center mb-4">Livraison Entrepôts</h2>
+				<div class="table-responsive">
+					<table class="table table-bordered table-hover align-middle" role="grid" aria-describedby="livraisonTableInfo">
+						<thead class="table-light">
+							<tr>
+								<th scope="col"><input type="checkbox" aria-label="Sélectionner toutes les livraisons"/></th>
+								<th scope="col">ID</th>
+								<th scope="col">Date Commande</th>
+								<th scope="col">Date Livraison</th>
+								<th scope="col">Fournisseur</th>
+								<th scope="col">Factures</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for livraison in livraisons %}
+								<tr>
+									<td>
+										<input type="checkbox" name="selected[]" value="{{ livraison.id }}" aria-label="Sélectionner livraison {{ livraison.id }}"/>
+									</td>
+									<td>{{ livraison.id }}</td>
+									<td>{{ livraison.transaction.date_creation|date('Y-m-d H:i:s') }}</td>
+									<td>{{ livraison.dateLivraison|date('Y-m-d') }}</td>
+									<td>
+										{% if livraison.transaction.client.nomEntreprise is defined %}
+											{{ livraison.transaction.client.nomEntreprise }}
+											-
+											{{ livraison.transaction.client.typeClient }}
+										{% else %}
+											—
+										{% endif %}
+									</td>
+									<td class="text-center">
+										{% if livraison.facture is defined and livraison.facture %}
+											<a href="{{ asset('uploads/factures/' ~ livraison.facture) }}" download title="Télécharger la facture">📎</a>
+										{% else %}
+											📎
+										{% endif %}
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="6" class="text-center text-muted">Aucune livraison enregistrée.</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script>
+		// Exemple simple de validation basique avant soumission
+document.getElementById('formLivraison').addEventListener('submit', function (event) {
+const entrepot = this.entrepot.value.trim();
+const camion = this.camion.value;
+if (! entrepot) {
+alert('Merci de renseigner le nom de l\'entrepôt.');
+event.preventDefault();
+return false;
+}
+if (! camion) {
+alert('Merci de sélectionner un type de camion.');
+event.preventDefault();
+return false;
+}
+});
+	</script>
+
+
+{% endblock %}

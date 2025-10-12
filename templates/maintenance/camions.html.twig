@@ -1,0 +1,75 @@
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Camions A Nettoyer
+{% endblock %}
+{% block page_title %}🚛 Camions A Nettoyer
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'maintenance/asideMaintenance/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'maintenance/asideMaintenance/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main>
+		<h2 class="text-center mb-4">Liste Des Camions A Nettoyer</h2>
+
+		<div class="table-responsive">
+			<table class="table table-hover table-bordered bg-white shadow-sm">
+				<thead class="table-light">
+					<tr>
+						<th>#ID</th>
+						<th>Nom</th>
+						<th>Dernier nettoyage</th>
+						<th>Chargements depuis</th>
+						<th>Status actuel</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% if camions is empty %}
+						<tr>
+							<td colspan="6" class="text-center">Aucun camion à afficher</td>
+						</tr>
+					{% else %}
+						{% for camion in camions %}
+							<tr>
+								<td>{{ camion.id }}</td>
+								<td>{{ camion.nom }}</td>
+								<td>{{ camion.dernierNettoyage ? camion.dernierNettoyage|date('d/m/Y') : 'N/A' }}</td>
+								<td>{{ camion.nbChargementsDepuisDernierNettoyage }}</td>
+								<td>{{ camion.status }}</td>
+
+								<td>
+									<button class="btn btn-success btn-sm mark-clean" data-id="{{ camion.id }}">✅ Nettoyé</button>
+									<button class="btn btn-warning btn-sm put-maintenance" data-id="{{ camion.id }}">🔧 Maintenance</button>
+								</td>
+							</tr>
+						{% endfor %}
+					{% endif %}
+				</tbody>
+			</table>
+		</div>
+	</main>
+
+	<script>
+		document.querySelectorAll('.mark-clean').forEach(button => {
+button.addEventListener('click', () => {
+const camionId = button.dataset.id;
+alert (`Camion ${camionId} marqué comme nettoyé (logique API à venir)`);
+// À connecter à l'API plus tard
+});
+});
+
+document.querySelectorAll('.put-maintenance').forEach(button => {
+button.addEventListener('click', () => {
+const camionId = button.dataset.id;
+alert (`Camion ${camionId} mis en maintenance (logique API à venir)`);
+// À connecter à l'API plus tard
+});
+});
+	</script>
+{% endblock %}

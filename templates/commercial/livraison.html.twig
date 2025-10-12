@@ -1,0 +1,115 @@
+{# templates/commercial/livraison.html.twig #}
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Paramètres Des Frais De Livraison
+{% endblock %}
+
+{% block page_title %}🚚 Paramètres Des Frais De Livraison
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'commercial/asideCommercial/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'commercial/asideCommercial/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main>
+		{% for message in app.flashes('success') %}
+			<div class="alert alert-success">{{ message }}</div>
+		{% endfor %}
+		<form
+			method="post">
+			{# Champ caché avec token CSRF pour sécuriser le formulaire contre les attaques CSRF #}
+			<input type="hidden" name="_token" value="{{ csrf_token('livraison_save') }}">
+			<fieldset class="mb-4">
+				<legend>Transport direct en vrac (camion monocuve)</legend>
+				<div class="mb-3 row">
+					<label for="coutKilometreVrac" class="col-sm-4 col-form-label">Coût par kilomètre (€)</label>
+					<div class="col-sm-8">
+						<input type="number" step="0.01" class="form-control" id="coutKilometreVrac" name="coutKilometreVrac" value="{{ params.coutKilometreVrac }}" required>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label for="fraisFixeVrac" class="col-sm-4 col-form-label">Frais fixe (€)</label>
+					<div class="col-sm-8">
+						<input type="number" step="0.01" class="form-control" id="fraisFixeVrac" name="fraisFixeVrac" value="{{ params.fraisFixeVrac }}" required>
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset class="mb-4">
+				<legend>Transport palettes minoterie → boulanger</legend>
+				<div class="mb-3 row">
+					<label for="coutKilometrePaletteMinoterie" class="col-sm-4 col-form-label">Coût par kilomètre (€)</label>
+					<div class="col-sm-8">
+						<input type="number" step="0.01" class="form-control" id="coutKilometrePaletteMinoterie" name="coutKilometrePaletteMinoterie" value="{{ params.coutKilometrePaletteMinoterie }}" required>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label for="fraisFixePaletteMinoterie" class="col-sm-4 col-form-label">Frais fixe (€)</label>
+					<div class="col-sm-8">
+						<input type="number" step="0.01" class="form-control" id="fraisFixePaletteMinoterie" name="fraisFixePaletteMinoterie" value="{{ params.fraisFixePaletteMinoterie }}" required>
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset class="mb-4">
+				<legend>Transport palettes entrepôt → boulangerie</legend>
+				<div class="mb-3 row">
+					<label for="coutKilometrePaletteEntrepot" class="col-sm-4 col-form-label">Coût par kilomètre (€)</label>
+					<div class="col-sm-8">
+						<input type="number" step="0.01" class="form-control" id="coutKilometrePaletteEntrepot" name="coutKilometrePaletteEntrepot" value="{{ params.coutKilometrePaletteEntrepot }}" required>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label for="baseFraisFixeEntrepot" class="col-sm-4 col-form-label">Base frais fixe (€)</label>
+					<div class="col-sm-8">
+						<input type="number" step="0.01" class="form-control" id="baseFraisFixeEntrepot" name="baseFraisFixeEntrepot" value="{{ params.baseFraisFixeEntrepot }}" required>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label for="prixPreparationKg" class="col-sm-4 col-form-label">Prix préparation/kg (€)</label>
+					<div class="col-sm-8">
+						<input type="number" step="0.001" class="form-control" id="prixPreparationKg" name="prixPreparationKg" value="{{ params.prixPreparationKg }}" required>
+					</div>
+				</div>
+			</fieldset>
+
+			<button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+		</form>
+	</main>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		const burgerBtn = document.getElementById('burgerBtn');
+const mobileSidebar = document.getElementById('mobileSidebar');
+const offcanvasInstance = new bootstrap.Offcanvas(mobileSidebar);
+
+burgerBtn.addEventListener('click', () => {
+offcanvasInstance.show();
+});
+
+mobileSidebar.addEventListener('show.bs.offcanvas', () => {
+burgerBtn.style.display = 'none';
+});
+
+mobileSidebar.addEventListener('hidden.bs.offcanvas', () => {
+burgerBtn.style.display = 'flex';
+});
+
+window.addEventListener('resize', () => {
+if (window.innerWidth > 768) {
+burgerBtn.style.display = 'none';
+const offcanvas = bootstrap.Offcanvas.getInstance(mobileSidebar);
+if (offcanvas) 
+offcanvas.hide();
+
+
+
+}
+});
+	</script>
+{% endblock %}

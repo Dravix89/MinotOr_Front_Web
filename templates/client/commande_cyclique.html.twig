@@ -1,0 +1,125 @@
+{# templates/client/commande_cyclique.html.twig #}
+
+{% block title %}Commande Cyclique
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+
+{% block page_title %}🔁 Commande Cyclique
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+
+	<main class="flex-grow-1 p-4">
+
+		<form
+			method="post" action="{{ path('client_commande_cyclique') }}" class="container py-3" id="commandeForm">
+			{# Token CSRF pour protéger la soumission du formulaire contre les attaques CSRF #}
+			<input type="hidden" name="_token" value="{{ csrf_token('commande_cyclique') }}">
+			<div id="products-wrapper">
+				<div class="row g-3 align-items-end mb-3 product-block">
+					<div class="col-12 col-md-5">
+						<label class="form-label">Produit</label>
+						<select name="produits[0][id]" class="form-select" required>
+							{% for produit in produits %}
+								<option value="{{ produit.id }}">{{ produit.nomProduit }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-6 col-md-3">
+						<label class="form-label">Quantité</label>
+						<input type="number" name="produits[0][quantite]" class="form-control" min="1" required>
+					</div>
+					<div class="col-6 col-md-4">
+						<label class="form-label">Fréquence</label>
+						<select name="produits[0][frequence]" class="form-select" required>
+							<option value="quotidien">Quotidien</option>
+							<option value="hebdomadaire">Hebdomadaire</option>
+							<option value="mensuel">Mensuel</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<button type="button" id="addProductBtn" class="btn btn-outline-primary mb-3">+ Ajouter Un Produit</button>
+
+			<div class="mb-3">
+				<label for="date_debut" class="form-label">Date de début</label>
+				<input type="date" id="date_debut" name="date_debut" class="form-control" required>
+			</div>
+			<button type="submit" class="btn btn-success">Enregistrer la commande cyclique</button>
+		</form>
+
+	</main>
+</div>
+
+<script>
+	document.getElementById('addProductBtn').addEventListener('click', () => {
+const wrapper = document.getElementById('products-wrapper');
+const blocks = wrapper.querySelectorAll('.product-block');
+const newIndex = blocks.length;
+const newBlock = blocks[0].cloneNode(true);
+
+// Reset values
+newBlock.querySelectorAll('select, input').forEach(input => {
+if (input.tagName === 'SELECT') 
+input.selectedIndex = 0;
+ else 
+input.value = '';
+
+
+
+});
+
+// Update names with new index
+newBlock.querySelectorAll('select, input').forEach(input => {
+const name = input.getAttribute('name');
+if (name) {
+input.setAttribute('name', name.replace(/\d+/, newIndex));
+}
+});
+
+wrapper.appendChild(newBlock);
+});
+</script>
+
+<script>
+	document.getElementById('commandeForm').addEventListener('submit', async function (e) {
+e.preventDefault();
+
+const form = e.target;
+const formData = new FormData(form);
+
+const response = await fetch(form.action, {
+method: 'POST',
+body: formData
+});
+
+if (response.redirected) {
+const selected = [];
+const produits = form.querySelectorAll('select[name^="produits"]');
+produits.forEach(select => {
+const selectedOption = select.options[select.selectedIndex];
+selected.push(selectedOption.text);
+});
+
+const container = document.getElementById('selection-produits');
+container.innerHTML = '';
+selected.forEach(label => {
+const p = document.createElement('p');
+p.textContent = label;
+container.appendChild(p);
+});
+}
+});
+</script>{% endblock %}

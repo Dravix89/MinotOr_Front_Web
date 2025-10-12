@@ -1,0 +1,185 @@
+{# templates/commercial/fournisseurs.html.twig #}
+{% extends 'menuGeneral.html.twig' %}
+
+{% block title %}Gestion Des Fournisseurs
+{% endblock %}
+{% block page_title %}📦 Gestion Des Fournisseurs Minotiers
+{% endblock %}
+
+{% block sidebar %}
+	{% include 'commercial/asideCommercial/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'commercial/asideCommercial/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main class="flex-fill overflow-auto p-4 mb-4" role="main">
+
+		<div class="mb-4 text-end">
+			<button id="btnToggleForm" class="btn btn-primary">➕ Ajouter un fournisseur</button>
+		</div>
+
+		<div id="formSupplier" class="card p-4 mb-4" style="display:none; max-width: 700px; margin: auto;">
+			<h2 class="h5 text-center mb-4">Ajouter Un Fournisseur</h2>
+			<form id="formAddFournisseur" action="{{ path('commercial_fournisseurs_create') }}" method="POST" style="display:none;">
+				<input type="hidden" name="_token" value="{{ csrf_token('fournisseur_form') }}">
+				<div class="mb-3">
+					<input type="text" class="form-control" name="typeFournisseur" placeholder="Type Fournisseur" required>
+				</div>
+				<div class="mb-3">
+					<input type="text" class="form-control" name="nomEntreprise" placeholder="Nom Entreprise" required>
+				</div>
+				<div class="mb-3">
+					<input type="text" class="form-control" name="nom" placeholder="Nom contact" required>
+				</div>
+				<div class="mb-3">
+					<input type="text" class="form-control" name="prenom" placeholder="Prénom contact" required>
+				</div>
+				<div class="mb-3">
+					<input type="email" class="form-control" name="email" placeholder="Email" required>
+				</div>
+				<div class="mb-3">
+					<input type="text" class="form-control" name="telephone" placeholder="Téléphone" required>
+				</div>
+				<div class="mb-4">
+					<input type="text" class="form-control" name="siret" placeholder="SIRET" required>
+				</div>
+				<div class="text-center">
+					<button type="submit" class="btn btn-success px-4">Ajouter</button>
+				</div>
+			</form>
+		</div>
+
+
+		<div class="table-responsive">
+			<table class="table table-bordered table-striped table-hover bg-white text-nowrap align-middle" id="supplierTable">
+				<thead class="table-dark">
+					<tr>
+						<th>Type Fournisseur</th>
+						<th>Nom Entreprise</th>
+						<th>Nom</th>
+						<th>Prénom</th>
+						<th>Email</th>
+						<th>Téléphone</th>
+						<th>SIRET</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for supplier in fournisseurs %}
+						<tr data-index="{{ loop.index0 }}" data-id="{{ supplier.id }}">
+							<td>{{ supplier.typeFournisseur }}</td>
+							<td>{{ supplier.nomEntreprise }}</td>
+							<td>{{ supplier.nom }}</td>
+							<td>{{ supplier.prenom }}</td>
+							<td>{{ supplier.email }}</td>
+							<td>{{ supplier.telephone }}</td>
+							<td>{{ supplier.siret }}</td>
+							<td>
+								<button class="btn btn-sm btn-warning btnEdit" data-id="{{ supplier.id }}">✏️ Modifier</button>
+							</td>
+						</tr>
+						<tr class="edit-row" id="edit-row-{{ supplier.id }}" style="display:none;">
+							<td colspan="8">
+								<form action="{{ path('commercial_fournisseurs_edit', {id: supplier.id}) }}" method="POST" class="row gx-2">
+									<input type="hidden" name="_token" value="{{ csrf_token('fournisseur_form') }}">
+									<div class="col-md-2"><input type="text" class="form-control" name="typeFournisseur" value="{{ supplier.typeFournisseur }}" required></div>
+									<div class="col-md-2"><input type="text" class="form-control" name="nomEntreprise" value="{{ supplier.nomEntreprise }}" required></div>
+									<div class="col-md-2"><input type="text" class="form-control" name="nom" value="{{ supplier.nom }}" required></div>
+									<div class="col-md-2"><input type="text" class="form-control" name="prenom" value="{{ supplier.prenom }}" required></div>
+									<div class="col-md-2"><input type="email" class="form-control" name="email" value="{{ supplier.email }}" required></div>
+									<div class="col-md-2"><input type="text" class="form-control" name="telephone" value="{{ supplier.telephone }}" required></div>
+									<div class="col-md-2 mt-2"><input type="text" class="form-control" name="siret" value="{{ supplier.siret }}" required></div>
+									<div class="col-md-1 mt-2 text-end">
+										<button type="submit" class="btn btn-sm btn-success">💾</button>
+									</div>
+								</form>
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="8" class="text-center">Aucun fournisseur disponible</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+
+			</table>
+
+		</div>
+	</main>
+</div>
+<script>
+	function initSupplierScript() {
+const btnToggleForm = document.getElementById('btnToggleForm');
+const formSupplierDiv = document.getElementById('formSupplier');
+const formAddFournisseur = document.getElementById('formAddFournisseur');
+const tbody = document.querySelector('#supplierTable tbody');
+
+if (! btnToggleForm || ! formSupplierDiv || ! formAddFournisseur || ! tbody) 
+return;
+
+
+
+// Bouton pour afficher/masquer le formulaire d'ajout
+btnToggleForm.addEventListener('click', () => {
+if (formSupplierDiv.style.display === 'block') {
+formSupplierDiv.style.display = 'none';
+formAddFournisseur.style.display = 'none';
+formAddFournisseur.reset();
+btnToggleForm.textContent = '➕ Ajouter un fournisseur';
+} else {
+formSupplierDiv.style.display = 'block';
+formAddFournisseur.style.display = 'block';
+formAddFournisseur.reset();
+btnToggleForm.textContent = '❌ Annuler';
+}
+
+// Au toggle, masquer toutes les lignes d'édition
+document.querySelectorAll('tr.edit-row').forEach(tr => tr.style.display = 'none');
+});
+
+// Gestion clic sur bouton Modifier
+tbody.addEventListener('click', (e) => {
+if (e.target.classList.contains('btnEdit')) {
+const supplierId = e.target.dataset.id;
+if (! supplierId) 
+return;
+
+
+
+// Masquer le formulaire d'ajout
+formSupplierDiv.style.display = 'none';
+formAddFournisseur.style.display = 'none';
+btnToggleForm.textContent = '➕ Ajouter un fournisseur';
+
+const editRow = document.getElementById (`edit-row-${supplierId}`);
+if (! editRow) 
+return;
+
+
+
+const isAlreadyVisible = editRow.style.display === 'table-row';
+
+// Masquer toutes les lignes d'édition
+document.querySelectorAll('tr.edit-row').forEach(tr => {
+tr.style.display = 'none';
+});
+
+// Toggle : si elle n'était pas visible, on l'affiche
+if (! isAlreadyVisible) {
+editRow.style.display = 'table-row';
+editRow.scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+}
+});
+}
+
+// Initialisation au chargement
+if (window.Turbo) {
+document.addEventListener('turbo:load', initSupplierScript);
+} else {
+document.addEventListener('DOMContentLoaded', initSupplierScript);
+}
+</script>{% endblock %}

@@ -1,0 +1,220 @@
+{# templates/client/facturePDF.html.twig #}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8"/>
+		<title>Facture
+			{{ facture.numero }}</title>
+		<style>
+			/* Reset basique */
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 30px;
+				font-family: Arial, sans-serif;
+				color: #333;
+			}
+			header {
+				border-bottom: 3px solid #bf8125;
+				padding-bottom: 15px;
+				margin-bottom: 30px;
+				text-align: left;
+			}
+			header h1 {
+				color: #bf8125;
+				font-weight: 700;
+				font-size: 2.5rem;
+				margin: 0 0 5px;
+			}
+			header small {
+				color: #666;
+				font-size: 0.9rem;
+				line-height: 1.4;
+			}
+
+			h2 {
+				color: #2f8f2f; /* vert Bootstrap équivalent */
+				padding-bottom: 8px;
+				margin-bottom: 20px;
+				font-weight: 600;
+				font-size: 1.5rem;
+			}
+
+			/* Grid simple (remplace bootstrap row/col) */
+			.row {
+				display: flex;
+				flex-wrap: wrap;
+				margin-bottom: 1rem;
+			}
+			.col-6 {
+				width: 50%;
+				padding-right: 10px;
+				padding-left: 10px;
+			}
+			.mb-2 {
+				margin-bottom: 0.5rem;
+			}
+			.mb-4 {
+				margin-bottom: 1.5rem;
+			}
+			.mb-5 {
+				margin-bottom: 3rem;
+			}
+
+			p {
+				margin: 0.25rem 0;
+			}
+			strong {
+				font-weight: 700;
+			}
+
+			/* Tables */
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-bottom: 1.5rem;
+				font-size: 0.95rem;
+			}
+			thead {
+				background-color: #bf8125;
+				color: white;
+			}
+			th,
+			td {
+				border: 1px solid #ddd;
+				padding: 8px 10px;
+				text-align: left;
+			}
+			tbody tr:nth-child(odd) {
+				background-color: #f9f9f9;
+			}
+			tbody tr:hover {
+				background-color: #eee;
+			}
+
+			/* Pied de page */
+			footer {
+				margin-top: 50px;
+				font-size: 0.85rem;
+				color: #4e4435;
+				border-top: 1px solid #e4d9ca;
+				padding-top: 10px;
+				text-align: center;
+				font-style: italic;
+			}
+
+			/* Text muted */
+			.text-muted {
+				color: #6c757d;
+			}
+			.fs-5 {
+				font-size: 1.25rem;
+				font-weight: 500;
+			}
+		</style>
+	</head>
+	<body>
+		<div>
+			<header>
+				<h1>Minot’Or</h1>
+				<small class="text-muted">
+					Siège social : 12 Rue des Entrepreneurs, 92000 Nanterre<br/>
+					Téléphone : 01 23 45 67 89<br/>
+					Email : contact@minotor.fr<br/>
+					SIRET : 123 456 789 00012
+				</small>
+			</header>
+
+			<section class="mb-4">
+				<h2>Facture
+					{{ facture.numero }}</h2>
+				<div class="row">
+					<div class="col-6 mb-2">
+						<p>
+							<strong>Date d’émission :</strong>
+							{{ facture.date|date('d/m/Y') }}</p>
+						<p>
+							<strong>Montant TTC :</strong>
+							{{ facture.montant_ttc }}
+							€</p>
+					</div>
+					<div class="col-6 mb-2">
+						<p>
+							<strong>Mode de paiement :</strong>
+							{{ facture.mode_paiement }}</p>
+						<p>
+							<strong>Date de paiement :</strong>
+							{{ facture.date_paiement ? facture.date_paiement|date('d/m/Y') : 'N/A' }}</p>
+						<p>
+							<strong>Statut de paiement :</strong>
+							{{ facture.statut_paiement }}</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="mb-5">
+				<h2>Client</h2>
+				<p class="fs-5 mb-1">{{ client.prenom }}
+					{{ client.nom }}</p>
+				<p class="text-muted">{{ client.email }}</p>
+			</section>
+
+			<section class="mb-5">
+				<h2>Produits</h2>
+				<table>
+					<thead>
+						<tr>
+							<th>Nom du produit</th>
+							<th>Prix unitaire (€)</th>
+							<th>Quantité</th>
+							<th>Total (€)</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for contenu in facture.produits %}
+							<tr>
+								<td>{{ contenu.produit.nomProduit }}</td>
+								<td>{{ contenu.produit.prixProduit|number_format(2, ',', ' ') }}</td>
+								<td>{{ contenu.quantiteProduit }}</td>
+								<td>{{ (contenu.produit.prixProduit * contenu.quantiteProduit)|number_format(2, ',', ' ') }}</td>
+							</tr>
+						{% endfor %}
+
+					</tbody>
+				</table>
+				{# Bloc des montants basés sur facture.montant_ttc #}
+				{% set montantTTC = facture.montant_ttc %}
+				{% set tauxTVA = 0.20 %}
+				{% set montantHT = montantTTC / (1 + tauxTVA) %}
+				{% set montantTVA = montantTTC - montantHT %}
+				<table class="table">
+					<tbody>
+						<tr>
+							<th>Montant HT</th>
+							<td>{{ montantHT|number_format(2, ',', ' ') }}
+								€</td>
+						</tr>
+						<tr>
+							<th>Montant TVA (20%)</th>
+							<td>{{ montantTVA|number_format(2, ',', ' ') }}
+								€</td>
+						</tr>
+						<tr>
+							<th>Montant TTC</th>
+							<td>{{ montantTTC|number_format(2, ',', ' ') }}
+								€</td>
+						</tr>
+					</tbody>
+				</table>
+
+			</section>
+
+			<footer>
+				Minotor - 12 Rue des Entrepreneurs, 92000 Nanterre - Tel : 01 23 45 67 89 - contact@minotor.fr - SIRET : 123 456 789 00012
+			</footer>
+		</body>
+	</body>
+</html></div></body></html>

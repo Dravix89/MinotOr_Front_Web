@@ -1,0 +1,106 @@
+{# templates/client/envies.html.twig #}
+
+{% block title %}Mes Envies
+{% endblock %}
+
+{% extends 'menuGeneral.html.twig' %}
+
+{% block page_title %}❤️ Mes Envies
+{% endblock %}
+
+
+{% block sidebar %}
+	{% include 'client/asideClient/_sidebar.html.twig' %}
+{% endblock %}
+
+{% block mobile_menu %}
+	{% include 'client/asideClient/menu_content.html.twig' %}
+{% endblock %}
+
+{% block main_content %}
+	<main class="flex-grow-1">
+		<div class="envies-container">
+
+			{% if envies is empty %}
+				<p class="text-center text-muted">Aucun produit dans votre liste d’envies pour le moment.</p>
+			{% else %}
+				<div class="row g-4">
+					{% set enviesIds = app.session.get('envies', []) %}
+					{% for produit in envies %}
+						<div class="col-md-4">
+							<div class="card envie-card h-100">
+								<img src="{{ produit.imageProduit ?? '/images/default.jpg' }}" class="card-img-top" alt="{{ produit.nomProduit }}">
+
+								<button type="button" class="heart-btn btn btn-link p-0 {{ produit.id in enviesIds ? 'favori' : '' }}" data-produit-id="{{ produit.id }}" style="position:absolute; top:10px; right:10px; font-size:1.5rem; color:#bf8125;">
+									<span class="heart-icon">{{ produit.id in enviesIds ? '❤️' : '🤍' }}</span>
+								</button>
+
+
+								<div class="card-body">
+									<h5 class="card-title">{{ produit.nomProduit }}</h5>
+
+									{# Pas de description, donc je mets la catégorie + type #}
+									<p class="card-text">
+										Catégorie :
+										{{ produit.categorieProduit }}<br>
+										Type :
+										{{ produit.typeProduit.nomTypeProduit }}
+									</p>
+
+									<div class="d-flex justify-content-between align-items-center mt-3">
+										<span class="fw-bold text-primary">{{ produit.prixProduit }}
+											€</span>
+										<a href="{{ path('client_ajouter_devis', { id: produit.id }) }}" class="btn btn-sm btn-outline-success">Ajouter Au Devis</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+			{% endif %}
+		</div>
+	</main>
+
+
+	<script>
+		// Pour chaque bouton "cœur", on ajoute un écouteur d'événement au clic
+document.querySelectorAll('.heart-btn').forEach(button => {
+button.addEventListener('click', async () => {
+const produitId = button.dataset.produitId; // Récupère l'ID du produit lié au bouton
+const csrfToken = '{{ csrf_token("ajouter_envie") }}';
+
+try {
+const response = await fetch('{{ path('client_ajouter_envie', {}, 0) }}', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json',
+'X-CSRF-TOKEN': csrfToken
+},
+body: JSON.stringify(
+{id: produitId}
+)
+});
+
+const data = await response.json();
+
+if (data.success) {
+const heartIcon = button.querySelector('.heart-icon');
+if (data.action === 'ajoute') {
+button.classList.add('favori');
+heartIcon.textContent = '❤️';
+} else if (data.action === 'retire') {
+button.classList.remove('favori');
+heartIcon.textContent = '🤍';
+}
+} else {
+alert('Erreur lors de la mise à jour des envies');
+}
+} catch (error) {
+alert('Erreur réseau');
+}
+});
+});
+	</script>
+
+
+{% endblock %}

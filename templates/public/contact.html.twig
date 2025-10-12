@@ -1,0 +1,87 @@
+{# templates/public/contact.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Contactez-Nous
+{% endblock %}
+
+{% block body %}
+	<style>
+
+		body {
+			background: linear-gradient(rgb(248, 247, 246), #f4f1ea, #ede5d2, #bf8125);
+		}
+		.custom-yellow {
+			color: #bf8125;
+		}
+		.btn-yellow {
+			background: linear-gradient(#f9f8f4, #f3edd9, #e8dfb8,rgba(191, 129, 37, 0.76));
+			font-weight: bold;
+			border: none;
+			padding: 0.75rem 1.5rem;
+			border-radius: 8px;
+			transition: all 0.3s ease;
+			text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+			color: #4a3c0a;
+		}
+		.btn-yellow:hover {
+			background: linear-gradient(#f7f6f0, #ebe5cc, #d8c88f,rgb(181, 124, 33));
+			transform: translateY(-2px);
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
+			cursor: pointer;
+			color: #3d3108;
+		}
+
+		.btn-yellow:active {
+			background: linear-gradient(#f4f3ed, #e3ddc0, #cbbf7b, #8d6215);
+			transform: translateY(0);
+			box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+			color: #2f2506;
+		}
+	</style>
+
+	<main class="container py-5">
+		<div class="row justify-content-center">
+			<div class="col-12 col-md-8 col-lg-6 bg-white rounded shadow p-2 mt-4">
+				<h1 class="text-center custom-yellow mb-2">Contactez-Nous</h1>
+				<p class="text-center text-muted mb-3">Une question ? Besoin d’aide ? Contactez-nous !</p>
+
+				{% for message in app.flashes('success') %}
+					<div class="alert alert-success">{{ message }}</div>
+				{% endfor %}
+
+				{% if errors is defined and errors|length > 0 %}
+					<div class="alert alert-danger">
+						<ul>
+							{% for error in errors %}
+								<li>{{ error }}</li>
+							{% endfor %}
+						</ul>
+					</div>
+				{% endif %}
+
+				<form method="post" action="{{ path('public_contact_submit') }}">
+					<input type="hidden" name="_csrf_token" value="{{ csrf_token('contact_form') }}">
+
+					<div class="mb-2">
+						<label for="name" class="form-label">Nom :</label>
+						<input type="text" id="name" name="name" class="form-control" required value="{{ old.name|default('') }}">
+					</div>
+
+					<div class="mb-2">
+						<label for="email" class="form-label">Email :</label>
+						<input type="email" id="email" name="email" class="form-control" required value="{{ old.email|default('') }}">
+					</div>
+
+					<div class="mb-2">
+						<label for="message" class="form-label">Message :</label>
+						<textarea id="message" name="message" class="form-control" rows="5" required>{{ old.message|default('') }}</textarea>
+					</div>
+
+					<div class="d-grid">
+						<button type="submit" class="btn btn-yellow mb-1">Envoyer</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</main>
+{% endblock %}

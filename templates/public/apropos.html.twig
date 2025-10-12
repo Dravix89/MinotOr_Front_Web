@@ -1,0 +1,69 @@
+{# templates/public/apropos.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}À Propos De Minotor
+{% endblock %}
+
+{% block body %}
+	<style>
+		body {
+			background: none;
+		}
+		main {
+			max-width: 900px;
+			margin: 5rem auto;
+			padding: 2rem;
+			border-radius: 10px;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+			background: linear-gradient(rgb(248, 247, 246), #f4f1ea, #ede5d2, #bf8125);
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		}
+		@media(max-width: 576px) {
+			main {
+				margin: 2rem 1rem;
+				padding: 1.5rem;
+			}
+		}
+
+
+		h1 {
+			text-align: center;
+			margin-bottom: 1.5rem;
+			color: #bf8125;
+		}
+		h2 {
+			color: #8b6b2c;
+			margin-top: 2rem;
+		}
+		p {
+			line-height: 1.6;
+			margin-bottom: 1rem;
+			color: #444;
+		}
+		ul {
+			list-style-type: disc;
+			margin-left: 1.5rem;
+			color: #555;
+		}
+	</style>
+
+	<main class="px-3">
+		<h1>À Propos De Minot’Or</h1>
+
+		<p>Minot’Or est une entreprise spécialisée dans la fourniture de matières premières pour la boulangerie, avec un accent particulier sur la qualité et la fiabilité. Notre expertise nous permet de proposer une large gamme de produits soigneusement sélectionnés pour répondre aux besoins des professionnels du secteur.</p>
+
+		<h2>Nos Engagements</h2>
+		<ul>
+			<li>Qualité : Nous garantissons des produits conformes aux standards les plus élevés.</li>
+			<li>Transparence : Consultation uniquement, pas d'achat direct en ligne pour assurer un suivi personnalisé.</li>
+			<li>Conseil : Notre équipe est à votre disposition pour vous accompagner dans vos choix.</li>
+			<li>Respect de l’environnement : Nous privilégions des produits biologiques et issus de filières responsables.</li>
+		</ul>
+
+		<h2>Notre Mission</h2>
+		<p>Fournir aux artisans boulangers des matières premières de qualité supérieure pour leur permettre de créer des produits d’exception, tout en maintenant un service client personnalisé et réactif.</p>
+
+		<h2>Contact</h2>
+		<p>Pour toute demande ou devis personnalisé, n’hésitez pas à nous contacter. Nous sommes à votre écoute pour répondre à vos besoins spécifiques.</p>
+	</main>
+{% endblock %}
